@@ -1,0 +1,293 @@
+
+:root {
+    --primary: #0f172a;
+    --on-primary: #ffffff;
+    --surface: #ffffff;
+    --on-surface: #1e293b;
+    --secondary-text: #64748b;
+    --outline-variant: #e2e8f0;
+    --surface-container-low: #f8fafc;
+    --surface-container-highest: #f1f5f9;
+    --font-family: system-ui, -apple-system, sans-serif;
+    --transition-fast: 0.2s ease;
+}
+
+.product-page {
+    max-width: 1440px;
+    margin: 60px auto;
+    padding: 3rem 1.5rem;
+    padding-bottom: 0;
+    font-family: var(--font-family);
+    color: var(--on-surface);
+    background-color: var(--surface);
+    box-sizing: border-box;
+}
+
+.product-page * {
+    box-sizing: border-box;
+}
+
+.page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--outline-variant);
+    padding-bottom: 2rem;
+    margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+    .page-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+}
+
+.page-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.page-desc {
+    font-size: 1.125rem;
+    color: var(--secondary-text);
+    max-width: 42rem;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.result-count {
+    font-size: 0.875rem;
+    color: var(--secondary-text);
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.sort-select {
+    appearance: none;
+    background-color: var(--surface);
+    border: 1px solid var(--outline-variant);
+    color: var(--on-surface);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.sort-select:focus {
+    border-color: var(--primary);
+}
+
+.select-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--secondary-text);
+    font-size: 1.25rem;
+}
+
+.page-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+@media (min-width: 1024px) {
+    .page-content {
+        flex-direction: row;
+    }
+}
+
+/* --- SIDEBAR BỘ LỌC --- */
+.sidebar {
+    width: 100%;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+    .sidebar { width: 16rem; }
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-title {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 1rem 0;
+}
+
+.filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: color var(--transition-fast);
+}
+
+.filter-checkbox:hover { color: var(--secondary-text); }
+.filter-checkbox input {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.size-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.chip {
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--outline-variant);
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+}
+
+.chip:hover:not(.disabled) { border-color: var(--primary); }
+.chip.active { background-color: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.chip.disabled {
+    background-color: var(--surface-container-highest);
+    color: #a1a1aa;
+    cursor: not-allowed;
+    opacity: 0.5;
+    border-color: transparent;
+}
+
+.color-chips { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+.color-btn {
+    width: 2rem; height: 2rem;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.color-btn.active { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--primary); }
+.color-btn:hover:not(.active) { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--outline-variant); }
+
+.price-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.price-btn {
+    padding: 0.5rem 1rem;
+    text-align: left;
+    background: transparent;
+    border: 1px solid var(--outline-variant);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+}
+
+.price-btn:hover:not(.active) {
+    border-color: var(--primary);
+    background-color: var(--surface-container-low);
+}
+.price-btn.active {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    border-color: var(--primary);
+}
+.price-btn:active { transform: scale(0.95); }
+
+/* --- LƯỚI SẢN PHẨM (Nơi render ProductCard) --- */
+.product-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 4rem;
+    column-gap: 2rem;
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 4rem;
+    width: 100%;
+}
+
+.page-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background-color: transparent;
+    border: 1px solid var(--outline-variant);
+    border-radius: 4px;
+    color: var(--on-surface);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.page-btn:hover:not(.disabled):not(.active) {
+    border-color: var(--primary);
+    background-color: var(--surface-container-low);
+}
+
+.page-btn.active {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    border-color: var(--primary);
+}
+
+.page-btn.disabled {
+    color: #a1a1aa;
+    cursor: not-allowed;
+    background-color: var(--surface-container-highest);
+    border-color: transparent;
+}
+
+.page-dots {
+    color: var(--secondary-text);
+    padding: 0 0.25rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+@media (min-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1280px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }

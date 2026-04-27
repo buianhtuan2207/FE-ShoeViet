@@ -1,5 +1,6 @@
 import React from 'react';
 import './Header.css';
+import { Link } from 'react-router-dom';
 
 function Header() {
     return (
@@ -13,10 +14,10 @@ function Header() {
 
                 {/* 2. Menu Links (Sát cạnh Logo) */}
                 <div className="header-links">
-                    <a className="nav-link" href="#men">Men</a>
-                    <a className="nav-link" href="#women">Women</a>
-                    <a className="nav-link" href="#kid">Kid</a>
-                    <a className="nav-link" href="#promotion">Promotion</a>
+                    <Link className="nav-link" to="/products?category=men">Men</Link>
+                    <Link className="nav-link" to="/products?category=women">Women</Link>
+                    <Link className="nav-link" to="/products?category=kid">Kid</Link>
+                    <Link className="nav-link" to="/products?category=promotion">Promotion</Link>
                 </div>
 
                 {/* 3. Thanh tìm kiếm (Chiếm trọn không gian giữa) */}
