@@ -1,0 +1,285 @@
+// register.module.scss
+
+// Variables (Tùy chỉnh theo theme của bạn)
+$primary-color: #000000;
+$surface-color: #f8f9fa;
+$surface-container: #ffffff;
+$text-primary: #111827;
+$text-secondary: #6b7280;
+$border-color: #e5e7eb;
+$border-focus: #3b82f6;
+
+.mainContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 1.5rem 3rem;
+  background-color: $surface-color;
+}
+
+.card {
+  width: 100%;
+  max-width: 36rem;
+  background-color: $surface-container;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}
+
+.formPanel {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  @media (min-width: 1024px) {
+    padding: 3rem;
+  }
+}
+
+.header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+
+  .title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: $primary-color;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: $text-secondary;
+    font-size: 1rem;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.inputWrapper {
+  label {
+    display: block;
+    font-size: 0.875rem;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: #f9fafb;
+    border: 1px solid $border-color;
+    border-radius: 0.5rem;
+    outline: none;
+    transition: all 0.2s;
+
+    &:focus {
+      box-shadow: 0 0 0 2px $primary-color;
+      border-color: transparent;
+    }
+
+    // 🔥 ĐOẠN QUAN TRỌNG: Ẩn hoàn toàn icon mắt mặc định của trình duyệt gõ mật khẩu
+    &::-ms-reveal,
+    &::-ms-clear {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+  }
+
+  .passwordField {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    input {
+      padding-right: 3rem; // Chừa khoảng trống bên phải để text không đè lên con mắt custom
+    }
+
+    .eyeBtn {
+      position: absolute;
+      right: 1rem;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $text-secondary;
+      transition: color 0.2s;
+
+      &:hover {
+        color: $primary-color;
+      }
+    }
+  }
+}
+
+.passwordCluster {
+  display: grid;
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.termsWrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1rem;
+
+  input[type="checkbox"] {
+    margin-top: 0.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.25rem;
+    border: 1px solid $border-color;
+    cursor: pointer;
+  }
+
+  label {
+    font-size: 1rem;
+    color: $text-secondary;
+
+    a {
+      color: $primary-color;
+      font-weight: 700;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 1rem;
+  background-color: $primary-color;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.divider {
+  position: relative;
+  padding: 1rem 0;
+
+  .line {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+
+    div {
+      width: 100%;
+      border-top: 1px solid $border-color;
+    }
+  }
+
+  .textWrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    font-size: 0.875rem;
+
+    span {
+      padding: 0 1rem;
+      background-color: $surface-container;
+      color: $text-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+  }
+}
+
+.socialGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+
+  .socialBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid $border-color;
+    border-radius: 0.5rem;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #f9fafb;
+      border-color: #d1d5db;
+
+      img, svg {
+        opacity: 1;
+      }
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    img, svg {
+      opacity: 0.9;
+      transition: opacity 0.2s;
+    }
+
+    span {
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: #3f3f46;
+    }
+  }
+}
+
+.redirect {
+  margin-top: 2rem;
+  text-align: center;
+
+  p {
+    font-size: 1rem;
+    color: $text-secondary;
+
+    a {
+      color: $primary-color;
+      font-weight: 700;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

@@ -1,0 +1,169 @@
+// Variables
+$primary: #000000;
+$on-primary: #ffffff;
+$surface-container-lowest: #ffffff;
+$surface: #f8f9fa;
+$text-secondary: #6b7280;
+$outline-variant: #d1d5db;
+
+.mainContainer {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem; // py-section-gap px-gutter
+  width: 100%;
+  min-height: 100vh;
+  background-color: $surface;
+}
+
+.card {
+  width: 100%;
+  max-width: 28rem; // max-w-md
+  background-color: $surface-container-lowest;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @media (min-width: 768px) {
+    padding: 2.5rem; // md:p-10
+  }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+  width: 100%;
+
+  .title {
+    font-size: 1.75rem; // text-headline-md
+    font-weight: 700;
+    color: $primary;
+    margin-bottom: 0.75rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    color: $text-secondary;
+  }
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.otpGrid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem; // gap-2
+  margin-bottom: 2rem;
+}
+
+.otpInput {
+  width: 3rem; // w-12
+  height: 3.5rem; // h-14
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border-radius: 0.5rem;
+  border: 1px solid $outline-variant;
+  background-color: $surface;
+  color: $primary;
+  outline: none;
+  transition: background-color 0.2s, border-color 0.2s;
+
+  &::placeholder {
+    color: $outline-variant;
+  }
+
+  &:focus {
+    border-color: $primary;
+    background-color: $surface-container-lowest;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.submitBtn {
+  width: 100%;
+  background-color: $primary;
+  color: $on-primary;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.secondaryActions {
+  text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; // gap-6
+}
+
+.resendBtn {
+  font-size: 1rem;
+  color: $text-secondary;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  &:hover {
+    color: $primary;
+  }
+
+  span {
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  color: $text-secondary;
+  text-decoration: none;
+  transition: color 0.2s;
+
+  &:hover {
+    color: $primary;
+
+    .arrowIcon {
+      transform: translateX(-4px); // group-hover:-translate-x-1
+    }
+  }
+
+  .arrowIcon {
+    transition: transform 0.2s;
+  }
+}

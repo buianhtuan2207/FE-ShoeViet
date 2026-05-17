@@ -38,9 +38,9 @@ function Header() {
                     <button className="action-button">
                         <span className="material-symbols-outlined">favorite_border</span>
                     </button>
-                    <button className="action-button">
+                    <Link to="/login" className="action-button">
                         <span className="material-symbols-outlined">person</span>
-                    </button>
+                    </Link>
                 </div>
 
             </div>
