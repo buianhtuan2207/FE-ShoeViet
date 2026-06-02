@@ -1,9 +1,70 @@
 import React, { useState } from 'react';
 import styles from './Login.module.scss';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import authService from '../../services/AuthService';
 
 function Login() {
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
+
+    // 1. Quản lý dữ liệu Form Đăng nhập
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
+
+    // 2. Quản lý trạng thái Loading và Thông báo (Thành công / Thất bại)
+    const [isLoading, setIsLoading] = useState(false);
+    const [alertMessage, setAlertMessage] = useState({ type: '', text: '' }); // type: 'success' hoặc 'error'
+
+    // Hàm xử lý khi người dùng gõ vào ô input
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    };
+
+    // Hàm xử lý khi bấm nút Đăng nhập
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setAlertMessage({ type: '', text: '' });
+        setIsLoading(true);
+
+        try {
+            const response = await authService.login(formData);
+
+            // 1. Lưu thông tin vào localStorage như cũ
+            localStorage.setItem('accessToken', response.token);
+            localStorage.setItem('userInfo', JSON.stringify({
+                email: response.email,
+                fullName: response.fullName,
+                role: response.role
+            }));
+
+            window.dispatchEvent(new Event('authChange'));
+
+            setAlertMessage({ type: 'success', text: 'Đăng nhập thành công! Đang chuyển hướng...' });
+
+            // 2. ĐIỀU HƯỚNG THEO PHÂN QUYỀN TẠI ĐÂY:
+            setTimeout(() => {
+                // Ép về chữ thường .toLowerCase() cho chắc chắn, tránh việc BE trả về "ADMIN" hoặc "Admin"
+                const userRole = response.role ? response.role.toLowerCase() : 'customer';
+
+                if (userRole === 'admin') {
+                    navigate('/admin'); // Nếu là admin thì đá sang trang quản trị luôn
+                } else {
+                    navigate('/');      // Khách hàng bình thường thì về trang chủ mua sắm
+                }
+            }, 1500);
+
+        } catch (error) {
+            setAlertMessage({ type: 'error', text: error.message });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <main className={styles.mainContainer}>
@@ -13,7 +74,22 @@ function Login() {
                     <p className={styles.subtitle}>Vui lòng nhập thông tin của bạn.</p>
                 </div>
 
-                <form className={styles.form}>
+                {/* Khối hiển thị thông báo alert lỗi hoặc thành công */}
+                {alertMessage.text && (
+                    <div style={{
+                        padding: '12px',
+                        borderRadius: '8px',
+                        marginBottom: '16px',
+                        fontSize: '14px',
+                        backgroundColor: alertMessage.type === 'success' ? '#def7ec' : '#fde8e8',
+                        color: alertMessage.type === 'success' ? '#03543f' : '#9b1c1c',
+                        border: `1px solid ${alertMessage.type === 'success' ? '#bfecdb' : '#f8b4b4'}`
+                    }}>
+                        {alertMessage.text}
+                    </div>
+                )}
+
+                <form className={styles.form} onSubmit={handleSubmit}>
                     {/* Email Input */}
                     <div className={styles.inputGroup}>
                         <label htmlFor="email">Địa chỉ Email</label>
@@ -22,6 +98,9 @@ function Login() {
                             name="email"
                             placeholder="nhap@email.com"
                             type="email"
+                            required
+                            value={formData.email}
+                            onChange={handleInputChange}
                         />
                     </div>
 
@@ -31,7 +110,7 @@ function Login() {
                             <label htmlFor="password" className={styles.noMarginBottom}>
                                 Mật khẩu
                             </label>
-                            <Link to="/forgotpw" href="#">Quên mật khẩu?</Link>
+                            <Link to="/forgotpw">Quên mật khẩu?</Link>
                         </div>
                         <div className={styles.inputWrapper}>
                             <input
@@ -40,6 +119,9 @@ function Login() {
                                 placeholder="••••••••"
                                 type={showPassword ? "text" : "password"}
                                 className={styles.passwordInput}
+                                required
+                                value={formData.password}
+                                onChange={handleInputChange}
                             />
                             <button
                                 type="button"
@@ -60,8 +142,8 @@ function Login() {
                         </div>
                     </div>
 
-                    <button className={styles.submitBtn} type="submit">
-                        Đăng nhập ngay
+                    <button className={styles.submitBtn} type="submit" disabled={isLoading}>
+                        {isLoading ? 'Đang xác thực...' : 'Đăng nhập ngay'}
                     </button>
                 </form>
 
@@ -96,7 +178,7 @@ function Login() {
 
                 <div className={styles.footer}>
                     <p>
-                        Chưa có tài khoản? <Link to="/register" href="#">Đăng ký ngay</Link>
+                        Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
                     </p>
                 </div>
             </div>

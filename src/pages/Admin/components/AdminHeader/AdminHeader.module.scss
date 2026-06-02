@@ -167,3 +167,110 @@
   height: 100%;
   object-fit: cover;
 }
+/* ==========================================================================
+   BỔ SUNG CSS CHO DROPDOWN VÀ AVATAR CHỮ CHO ADMIN HEADER
+   ========================================================================== */
+
+.profileWrapper {
+  position: relative;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+
+  // Khi di chuột vào khu vực profile thì đổi nền nhẹ và hiện dropdown công cụ
+  &:hover {
+    background-color: #f3f4f6;
+
+    .dropdownMenu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+}
+
+// Thay thế css cho avatar hình ảnh cũ bằng khung tròn chứa text initials
+.userAvatar {
+  width: 38px;
+  height: 38px;
+  background-color: #1e293b; // Màu xám đen lịch lãm cho Dashboard
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+// Khung Dropdown menu ẩn mặc định bên dưới
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background-color: #ffffff;
+  min-width: 180px;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+  z-index: 999;
+
+  // Hiệu ứng mượt mà lúc ẩn/hiện
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s ease-in-out;
+}
+
+// Các hàng trong Menu cấu hình
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #334155;
+  text-decoration: none;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+  }
+
+  span {
+    font-size: 18px;
+    color: #64748b;
+  }
+}
+
+// Cấu hình dòng nút đăng xuất riêng biệt
+.logoutBtn {
+  border-top: 1px solid #edf2f7;
+  color: #ef4444; // Màu đỏ cảnh báo
+  margin-top: 4px;
+  padding-top: 12px;
+
+  &:hover {
+    background-color: #fef2f2;
+    color: #b91c1c;
+  }
+
+  span {
+    color: inherit; // Biểu tượng tự chuyển đỏ theo chữ
+  }
+}
