@@ -13,6 +13,7 @@ import OTPVerification from "../pages/OTPVerification";
 import ResetPassword from "../pages/ResetPassword";
 import Admin from "../pages/Admin";
 import Person from '../pages/Person';
+import History from '../pages/History';
 
 
 function AppRoutes() {
@@ -33,6 +34,7 @@ function AppRoutes() {
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/person" element={<Person />} />
+                <Route path="/history" element={<History />} />
             </Route>
 
             {/* 3. Xử lý khi người dùng nhập sai URL (Redirect về Home hoặc trang 404) */}
