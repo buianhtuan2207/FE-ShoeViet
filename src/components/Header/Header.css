@@ -269,4 +269,14 @@
 
 .logout-btn .material-symbols-outlined {
     color: inherit; /* Icon tự động ăn theo màu chữ đỏ */
+
+/* Prevent fixed header from overlapping page content */
+.header-nav + main {
+    padding-top: 5rem; /* matches .header-container height */
+}
+
+@media (max-width: 640px) {
+    .header-nav + main {
+        padding-top: 5rem;
+    }
 }

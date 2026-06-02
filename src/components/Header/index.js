@@ -118,6 +118,9 @@ function Header() {
                             <span className="material-symbols-outlined">person</span>
                         </Link>
                     )}
+                    <Link to="/person" className="action-button">
+                        <span className="material-symbols-outlined">person</span>
+                    </Link>
                 </div>
 
             </div>

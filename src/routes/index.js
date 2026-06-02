@@ -12,6 +12,8 @@ import ForgotPassword from "../pages/ForgotPassword";
 import OTPVerification from "../pages/OTPVerification";
 import ResetPassword from "../pages/ResetPassword";
 import Admin from "../pages/Admin";
+import Person from '../pages/Person';
+import History from '../pages/History';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -52,6 +54,10 @@ function AppRoutes() {
                     {/* Nếu sau này bạn có thêm trang /profile, /order-history... thì ném vào đây luôn */}
                 </Route>
 
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/person" element={<Person />} />
+                <Route path="/history" element={<History />} />
             </Route>
 
             {/* 3. Xử lý khi người dùng nhập sai URL (Redirect về Home) */}

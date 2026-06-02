@@ -1,0 +1,104 @@
+$surface: #f8f9fa;
+$on-surface: #111827;
+$on-surface-variant: #6b7280;
+$outline: #e5e7eb;
+$blue-main: #2563eb;
+
+.mainContainer {
+  flex-grow: 1;
+  padding: 3rem 1.5rem;
+  min-height: 100vh;
+  background-color: $surface;
+}
+
+.wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: $on-surface;
+}
+
+.subtitle {
+  color: $on-surface-variant;
+  margin-top: 0.25rem;
+}
+
+.ordersList {
+  display: grid;
+  gap: 1rem;
+}
+
+.orderCard {
+  background: #ffffff;
+  border: 1px solid $outline;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.orderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.orderId {
+  font-weight: 700;
+}
+
+.orderDate {
+  color: $on-surface-variant;
+  font-size: 0.9rem;
+}
+
+.orderMeta {
+  text-align: right;
+}
+
+.total {
+  font-weight: 700;
+}
+
+.status {
+  margin-top: 0.25rem;
+  color: $on-surface-variant;
+  font-size: 0.9rem;
+}
+
+.orderActions {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.viewLink {
+  color: $blue-main;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 2rem 1rem;
+  background: #fff;
+  border: 1px dashed $outline;
+  border-radius: 8px;
+}
+
+.continueBtn {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.6rem 1rem;
+  background: $blue-main;
+  color: #fff;
+  border-radius: 6px;
+  text-decoration: none;
+}
