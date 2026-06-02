@@ -147,3 +147,14 @@
         color: #18181b;
     }
 }
+
+/* Prevent fixed header from overlapping page content */
+.header-nav + main {
+    padding-top: 5rem; /* matches .header-container height */
+}
+
+@media (max-width: 640px) {
+    .header-nav + main {
+        padding-top: 5rem;
+    }
+}
