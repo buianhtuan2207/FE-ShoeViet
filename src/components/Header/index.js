@@ -83,7 +83,6 @@ function Header() {
                         <span className="material-symbols-outlined">favorite_border</span>
                     </button>
 
-                    {/* XỬ LÝ ĐỔI AVATAR / LOGIN TẠI ĐÂY */}
                     {user ? (
                         <div className="profile-menu-container">
                             <div className="user-avatar-wrapper">
@@ -94,7 +93,7 @@ function Header() {
                             </div>
 
                             <div className="dropdown-menu">
-                                {/* NÚT BONUS: Chỉ hiển thị nếu user có role là admin */}
+                                {/* Chỉ hiển thị nếu user có role là admin */}
                                 {user.role === 'admin' && (
                                     <Link to="/admin" className="dropdown-item" style={{ color: '#2563eb' }}>
                                         <span className="material-symbols-outlined" style={{ color: '#2563eb' }}>dashboard</span>
@@ -102,7 +101,7 @@ function Header() {
                                     </Link>
                                 )}
 
-                                <Link to="/profile" className="dropdown-item">
+                                <Link to="/person" className="dropdown-item">
                                     <span className="material-symbols-outlined">account_circle</span>
                                     Thông tin tài khoản
                                 </Link>
@@ -114,13 +113,11 @@ function Header() {
                             </div>
                         </div>
                     ) : (
+                        // Khi chưa đăng nhập: Chỉ hiển thị duy nhất 1 icon này để dẫn sang trang Login
                         <Link to="/login" className="action-button">
                             <span className="material-symbols-outlined">person</span>
                         </Link>
                     )}
-                    <Link to="/person" className="action-button">
-                        <span className="material-symbols-outlined">person</span>
-                    </Link>
                 </div>
 
             </div>

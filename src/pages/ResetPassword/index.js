@@ -1,10 +1,71 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import styles from './ResetPassword.module.scss';
+import authService from '../../services/AuthService';
 
 function ResetPassword() {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // Lấy thông tin email và mã otp được truyền từ trang OTP sang để làm bằng chứng gửi lên Backend
+    const email = location.state?.email || '';
+    const otp = location.state?.otp || '';
+
+    // Trạng thái hiển thị mật khẩu (Ẩn/Hiện)
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    // Trạng thái form
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState({ type: '', text: '' });
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // 1. Kiểm tra an toàn: Nếu mất email hoặc otp, bắt người dùng quay lại từ đầu
+        if (!email || !otp) {
+            setMessage({ type: 'error', text: 'Thông tin xác thực đã hết hạn. Vui lòng quay lại nhập Email!' });
+            return;
+        }
+
+        // 2. Validate độ dài mật khẩu phía Client
+        if (newPassword.length < 6) {
+            setMessage({ type: 'error', text: 'Mật khẩu mới phải có ít nhất 6 ký tự!' });
+            return;
+        }
+
+        // 3. Kiểm tra xem 2 ô mật khẩu nhập vào có giống nhau không
+        if (newPassword !== confirmPassword) {
+            setMessage({ type: 'error', text: 'Xác nhận mật khẩu không trùng khớp!' });
+            return;
+        }
+
+        setIsLoading(true);
+        setMessage({ type: '', text: '' });
+
+        try {
+            // Gọi API lưu mật khẩu mới lên Spring Boot
+            const responseMsg = await authService.resetPassword({
+                email,
+                otp,
+                newPassword
+            });
+
+            setMessage({ type: 'success', text: responseMsg || 'Đặt lại mật khẩu thành công!' });
+
+            // Đợi 2 giây cho hiển thị thông báo rồi chuyển hướng sang trang Login để đăng nhập lại
+            setTimeout(() => {
+                navigate('/login');
+            }, 2000);
+
+        } catch (error) {
+            setMessage({ type: 'error', text: error.message });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <main className={styles.mainContainer}>
@@ -16,10 +77,26 @@ function ResetPassword() {
                 <div className={styles.card}>
                     <h2 className={styles.title}>Đặt lại mật khẩu</h2>
                     <p className={styles.subtitle}>
-                        Vui lòng nhập mật khẩu mới cho tài khoản của bạn. Đảm bảo mật khẩu mạnh và dễ nhớ.
+                        Vui lòng nhập mật khẩu mới cho tài khoản <strong style={{ color: '#2563eb' }}>{email}</strong>.
                     </p>
 
-                    <form className={styles.form}>
+                    {/* Khối hiển thị thông báo Lỗi hoặc Thành công */}
+                    {message.text && (
+                        <div style={{
+                            padding: '12px',
+                            borderRadius: '6px',
+                            marginBottom: '20px',
+                            fontSize: '14px',
+                            textAlign: 'center',
+                            backgroundColor: message.type === 'error' ? '#fee2e2' : '#d1fae5',
+                            color: message.type === 'error' ? '#b91c1c' : '#047857',
+                            border: `1px solid ${message.type === 'error' ? '#fca5a5' : '#6ee7b7'}`
+                        }}>
+                            {message.text}
+                        </div>
+                    )}
+
+                    <form className={styles.form} onSubmit={handleSubmit}>
                         {/* New Password Input */}
                         <div className={styles.inputGroup}>
                             <label htmlFor="new-password">Nhập Mật khẩu mới</label>
@@ -30,11 +107,15 @@ function ResetPassword() {
                                     placeholder="••••••••"
                                     type={showNewPassword ? "text" : "password"}
                                     required
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    disabled={isLoading}
                                 />
                                 <button
                                     type="button"
                                     className={styles.eyeBtn}
                                     onClick={() => setShowNewPassword(!showNewPassword)}
+                                    disabled={isLoading}
                                 >
                                     {showNewPassword ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20">
@@ -60,11 +141,15 @@ function ResetPassword() {
                                     placeholder="••••••••"
                                     type={showConfirmPassword ? "text" : "password"}
                                     required
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    disabled={isLoading}
                                 />
                                 <button
                                     type="button"
                                     className={styles.eyeBtn}
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    disabled={isLoading}
                                 >
                                     {showConfirmPassword ? (
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20">
@@ -81,8 +166,12 @@ function ResetPassword() {
                         </div>
 
                         {/* Action Button */}
-                        <button className={styles.submitBtn} type="submit">
-                            Đặt lại mật khẩu
+                        <button
+                            className={styles.submitBtn}
+                            type="submit"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'ĐANG CẬP NHẬT...' : 'Đặt lại mật khẩu'}
                         </button>
                     </form>
 
