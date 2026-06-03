@@ -1,57 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './ProductManagement.module.scss';
+import productService from '../../../../services/ProductSercive'; // Đảm bảo bạn đã tạo file service ở bước trước
 
-const productsData = [
-    {
-        id: 1,
-        name: 'Nike Air Max Pre-Day',
-        type: 'Giày chạy bộ',
-        brand: 'Nike',
-        sku: 'NK-MAX-2024',
-        stock: 42,
-        price: '3,450,000₫',
-        status: 'Còn hàng',
-        statusKey: 'inStock',
-        imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuArbvkkxa-D18gyoIv73Xr63aDtF6spjRFHDs5k6CryiW4ZdRiZqmIrhuWW2T7E80H_SxJOHujyBUk7lUKSCWaSegufA_1LiY3MZf3ByR2YL9ZFE353LnehaMQnel6vyOaSPVKZw7Li7gNcMVjBzoO_1nbMqywX9igDZQ7n84TdZkihv1KRGkE5xsNFMDdoOzfSTRAqmxGSEgESxLzv2LhjakIvt5XhllOfGl0VlHL92FE0HckhjnEqHGn6OAEfP0SpjiMvrsaaTSY'
-    },
-    {
-        id: 2,
-        name: 'Nike Dunk High Pastel',
-        type: 'Giày thời trang',
-        brand: 'Nike',
-        sku: 'NK-DUNK-092',
-        stock: 0,
-        price: '2,890,000₫',
-        status: 'Hết hàng',
-        statusKey: 'outOfStock',
-        imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCsRk26-oyQQ4YiIgskIhE6mSp5mYdl-_PCJuXVT7KhLm36lATt473Ru3vzwNZNBdwDrhU3aqp96neqPS6nCGOabj_drAVUegIMZwjogQPdJgoY-hP858ZXpegDHTuKO3xk-2F9fmq90op7SQYvb-8LO23bS9XNX2Tb2Kweypn9dteAhkTSh0FVEzdUp-NFZVr-bTqOIop0-bEGA2W1l1ctLQGw00vPwr9stpZPFoCOiIk3G09JAxGuVxs6prAa8bwI5sNm28_-0Sk'
-    },
-    {
-        id: 3,
-        name: 'Adidas Ultraboost 22',
-        type: 'Giày thể thao',
-        brand: 'Adidas',
-        sku: 'AD-UB-22-NV',
-        stock: 115,
-        price: '4,200,000₫',
-        status: 'Còn hàng',
-        statusKey: 'inStock',
-        imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDgoC63-dXO1_KMrE7RdHTB94sOq_YO1rCtl1KBg3c_qPheXgPvGhx7tP7jTYv9ZP8NbpHCcOT4KI8i_lH_Iq4XgCjjynMKNgqAbPujCF8Cc3S8oJ8QedrAwXLaEPjPuoWscxBXLjYwaTZc94XnlKEWPO9dVRfEE_9dCMRZa5EsDa-5Ni7g7-GwFC5ljX5MZVLhPOr3URirJujp0svckdpfNVh9TwmImln_kg-dCPq6vdrFo-vKx7Vq0NaZ9bWnxcG0rsK6eGPnrkM'
-    },
-    {
-        id: 4,
-        name: 'Jordan 1 Retro High',
-        type: 'Bóng rổ',
-        brand: 'Jordan',
-        sku: 'JD-1-RET-01',
-        stock: 12,
-        price: '12,500,000₫',
-        status: 'Còn hàng',
-        statusKey: 'inStock',
-        imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDK1Vsf3rrKn0sFHGtvv1FCh_N2JDSjDOsaEAZwlj4lY16e5vT2xICMVeQPwSDsocCKiL5pj4zNJIJReX-pn2ph-h9OKXoVd2VHv1fpZprYSYhpTU4Vp1kdufG5Z_-xL7V_P0IxMKNlhfzy1x8IuXaogDugTsDYR5-CGTq6TYZrGOEuO6YSGHcEp6u2_c_ti85t9ozhAEh3KTTpSkg4AEbsZ5Y5MLA3O_7zNmUpaV0G0FukS4OkZdYoO0MCg19bI2RrJaZO9qwfatk'
-    }
-];
-
+// GIỮ NGUYÊN data bento stats của bạn
 const statsBentoData = [
     {
         label: 'Tổng sản phẩm',
@@ -85,34 +36,135 @@ const statsBentoData = [
 ];
 
 function ProductManagement() {
-    // State quản lý trạng thái ẩn/hiện của Popup Modal
+    // --- BỔ SUNG CÁC STATE QUẢN LÝ DỮ LIỆU THẬT ---
+    const [products, setProducts] = useState([]); // Thay thế cho mảng productsData ảo
+    const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null); // null = Thêm mới, có giá trị = Sửa
 
-    // Hàm xử lý khi gửi form (Submit)
-    const handleFormSubmit = (e) => {
+    // State quản lý form điền dữ liệu (khớp hoàn toàn với các ô input trong Modal của bạn)
+    const [formData, setFormData] = useState({
+        name: '',
+        categoryId: '',
+        brandId: '',
+        sku: '',          // Bạn có thể lưu sku vào description hoặc xử lý tùy BE
+        stockQuantity: '', // Đồng bộ số lượng tồn kho
+        basePrice: '',     // Đồng bộ giá bán cơ bản
+        imageUrl: ''       // Đường dẫn hình ảnh URL
+    });
+
+    // --- BỔ SUNG CÁC HÀM GỌI API ---
+
+    // 1. Hàm tải danh sách sản phẩm từ Spring Boot
+    const loadProducts = async () => {
+        setIsLoading(true);
+        try {
+            const data = await productService.getAllProducts();
+            setProducts(data);
+        } catch (error) {
+            console.error("Lỗi lấy danh sách sản phẩm:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadProducts();
+    }, []);
+
+    // 2. Hàm mở modal (Xử lý cho cả nút Thêm mới và nút Sửa)
+    const openModal = (product = null) => {
+        if (product) {
+            setEditingProduct(product);
+            setFormData({
+                name: product.name,
+                categoryId: '1', // Mặc định ID danh mục phù hợp DB của bạn
+                brandId: '1',    // Mặc định ID thương hiệu phù hợp DB của bạn
+                sku: product.variants?.[0]?.sku || '',
+                stockQuantity: product.variants?.[0]?.stockQuantity || 0,
+                basePrice: product.basePrice,
+                imageUrl: product.imageUrl || ''
+            });
+        } else {
+            setEditingProduct(null);
+            setFormData({ name: '', categoryId: '', brandId: '', sku: '', stockQuantity: '', basePrice: '', imageUrl: '' });
+        }
+        setIsModalOpen(true);
+    };
+
+    // 3. Hàm xử lý thay đổi dữ liệu trong ô input form
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // 4. Hàm gửi form (Submit) - Đã sửa để xử lý cả Thêm mới & Cập nhật API
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
-        // Xử lý thêm logic thêm sản phẩm ở đây (gọi API...)
-        alert('Gửi thông tin sản phẩm thành công!');
-        setIsModalOpen(false); // Đóng modal sau khi hoàn tất
+
+        const payload = {
+            name: formData.name,
+            description: `Mã SKU: ${formData.sku}`, // Tạm lưu kèm SKU vào mô tả nếu bảng Product của bạn chưa có cột SKU độc lập
+            basePrice: parseFloat(formData.basePrice) || 0,
+            imageUrl: formData.imageUrl,
+            categoryId: parseInt(formData.categoryId) || 1,
+            brandId: parseInt(formData.brandId) || 1,
+            galleryImages: []
+        };
+
+        try {
+            if (editingProduct) {
+                // Gọi API cập nhật sản phẩm
+                await productService.updateProduct(editingProduct.id, payload);
+                alert('Cập nhật thông tin sản phẩm thành công!');
+            } else {
+                // Gọi API thêm sản phẩm mới
+                await productService.addProduct(payload);
+                alert('Thêm sản phẩm mới thành công!');
+            }
+            setIsModalOpen(false);
+            loadProducts(); // Cập nhật lại bảng dữ liệu mới
+        } catch (error) {
+            alert('Có lỗi xảy ra: ' + error.message);
+        }
+    };
+
+    // 5. Hàm xử lý Xóa sản phẩm qua API khi click nút Thùng rác
+    const handleDeleteProduct = async (id, name) => {
+        if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}" không?`)) {
+            try {
+                const msg = await productService.deleteProduct(id);
+                alert(msg);
+                loadProducts();
+            } catch (error) {
+                alert('Xóa thất bại: ' + error.message);
+            }
+        }
+    };
+
+    // Hàm format định dạng hiển thị tiền tệ VND
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
     };
 
     return (
         <main className={styles.main}>
             <div className={styles.container}>
 
-                {/* Page Header Section */}
+                {/* Page Header Section - GIỮ NGUYÊN GIAO DIỆN */}
                 <div className={styles.headerSection}>
                     <div>
                         <h2 className={styles.pageTitle}>Quản lý sản phẩm</h2>
                         <p className={styles.pageSubtitle}>Danh sách tất cả giày và phụ kiện hiện có trong hệ thống.</p>
                     </div>
-                    <button className={styles.addBtn} onClick={() => setIsModalOpen(true)}>
+                    {/* SỬA: Gắn sự kiện openModal(null) để kích hoạt chế độ thêm mới */}
+                    <button className={styles.addBtn} onClick={() => openModal(null)}>
                         <span className="material-symbols-outlined">add</span>
                         Thêm sản phẩm mới
                     </button>
                 </div>
 
-                {/* Contextual Stats Cards (Bento Style) */}
+                {/* Contextual Stats Cards (Bento Style) - GIỮ NGUYÊN 100% */}
                 <div className={styles.statsGrid}>
                     {statsBentoData.map((card, idx) => (
                         <div key={idx} className={`${styles.statCard} ${styles[card.themeClass]}`}>
@@ -131,7 +183,7 @@ function ProductManagement() {
                     ))}
                 </div>
 
-                {/* Filters Section */}
+                {/* Filters Section - GIỮ NGUYÊN 100% */}
                 <div className={styles.filtersBar}>
                     <div className={styles.selectWrapper}>
                         <span className={`${styles.filterIcon} material-symbols-outlined`}>category</span>
@@ -168,7 +220,7 @@ function ProductManagement() {
                     </button>
                 </div>
 
-                {/* Product Table Area */}
+                {/* Product Table Area - ĐỔ DỮ LIỆU THẬT VÀO ĐÂY */}
                 <div className={styles.tableCard}>
                     <div className={styles.tableWrapper}>
                         <table className={styles.table}>
@@ -184,61 +236,79 @@ function ProductManagement() {
                             </tr>
                             </thead>
                             <tbody className={styles.tbody}>
-                            {productsData.map((product) => (
-                                <tr key={product.id} className={styles.tr}>
-                                    <td className={styles.td}>
-                                        <div className={styles.imgCellWrapper}>
-                                            <img
-                                                src={product.imgUrl}
-                                                alt={product.name}
-                                                className={styles.productImg}
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className={styles.td}>
-                                        <p className={styles.productName}>{product.name}</p>
-                                        <p className={styles.productMeta}>{product.type} • {product.brand}</p>
-                                    </td>
-                                    <td className={styles.td}>
-                                        <span className={styles.skuBadge}>{product.sku}</span>
-                                    </td>
-                                    <td className={`${styles.td} ${styles.textCenter}`}>
-                                        <p className={`${styles.stockCount} ${product.stock === 0 ? styles.outOfStock : ''}`}>
-                                            {product.stock}
-                                        </p>
-                                        <p className={styles.stockUnit}>Chiếc</p>
-                                    </td>
-                                    <td className={styles.td}>
-                                        <span className={styles.priceText}>{product.price}</span>
-                                    </td>
-                                    <td className={styles.td}>
-                                        <span className={`${styles.statusBadge} ${styles[product.statusKey]}`}>
-                                            {product.status}
-                                        </span>
-                                    </td>
-                                    <td className={`${styles.td} ${styles.textRight}`}>
-                                        <div className={styles.actionsWrapper}>
-                                            <button className={styles.actionBtn} title="Cập nhật kho">
-                                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>inventory</span>
-                                            </button>
-                                            <button className={styles.actionBtn} title="Chỉnh sửa">
-                                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
-                                            </button>
-                                            <button className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Xóa">
-                                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                            {isLoading ? (
+                                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>Đang tải dữ liệu từ server...</td></tr>
+                            ) : products.length === 0 ? (
+                                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>Không có sản phẩm nào trong cơ sở dữ liệu.</td></tr>
+                            ) : (
+                                products.map((product) => {
+                                    // Trích xuất an toàn số lượng và SKU từ phần tử biến thể đầu tiên (nếu có)
+                                    const firstVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+                                    const totalStock = product.variants ? product.variants.reduce((sum, v) => sum + (v.stockQuantity || 0), 0) : 0;
+                                    const skuDisplay = firstVariant?.sku || `PROD-${product.id}`;
+                                    const statusText = totalStock > 0 ? 'Còn hàng' : 'Hết hàng';
+                                    const statusClass = totalStock > 0 ? 'inStock' : 'outOfStock';
+
+                                    return (
+                                        <tr key={product.id} className={styles.tr}>
+                                            <td className={styles.td}>
+                                                <div className={styles.imgCellWrapper}>
+                                                    <img
+                                                        src={product.imageUrl || 'https://placehold.co/50'}
+                                                        alt={product.name}
+                                                        className={styles.productImg}
+                                                        onError={(e) => { e.target.src = 'https://placehold.co/50'; }}
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className={styles.td}>
+                                                <p className={styles.productName}>{product.name}</p>
+                                                <p className={styles.productMeta}>{product.categoryName || 'Giày'} • {product.brandName || 'Chính hãng'}</p>
+                                            </td>
+                                            <td className={styles.td}>
+                                                <span className={styles.skuBadge}>{skuDisplay}</span>
+                                            </td>
+                                            <td className={`${styles.td} ${styles.textCenter}`}>
+                                                <p className={`${styles.stockCount} ${totalStock === 0 ? styles.outOfStock : ''}`}>
+                                                    {totalStock}
+                                                </p>
+                                                <p className={styles.stockUnit}>Chiếc</p>
+                                            </td>
+                                            <td className={styles.td}>
+                                                <span className={styles.priceText}>{formatCurrency(product.basePrice)}</span>
+                                            </td>
+                                            <td className={styles.td}>
+                                                <span className={`${styles.statusBadge} ${styles[statusClass]}`}>
+                                                    {statusText}
+                                                </span>
+                                            </td>
+                                            <td className={`${styles.td} ${styles.textRight}`}>
+                                                <div className={styles.actionsWrapper}>
+                                                    <button className={styles.actionBtn} title="Cập nhật kho">
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>inventory</span>
+                                                    </button>
+                                                    {/* SỬA: Thêm sự kiện onClick để mở modal sửa */}
+                                                    <button className={styles.actionBtn} title="Chỉnh sửa" onClick={() => openModal(product)}>
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
+                                                    </button>
+                                                    {/* SỬA: Thêm sự kiện onClick để gọi hàm xóa */}
+                                                    <button className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Xóa" onClick={() => handleDeleteProduct(product.id, product.name)}>
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
                             </tbody>
                         </table>
                     </div>
 
-                    {/* Pagination Footer */}
+                    {/* Pagination Footer - GIỮ NGUYÊN 100% */}
                     <div className={styles.pagination}>
                         <p className={styles.pageText}>
-                            Hiển thị <span>1 - 10</span> trong số <span>245</span> sản phẩm
+                            Hiển thị <span>1 - {products.length}</span> trong số <span>{products.length}</span> sản phẩm
                         </p>
                         <div className={styles.pageControls}>
                             <button className={styles.pageBtn} disabled>
@@ -258,14 +328,16 @@ function ProductManagement() {
 
             </div>
 
-            {/* POPUP MODAL SECTION */}
+            {/* POPUP MODAL SECTION - GIỮ NGUYÊN CẤU TRÚC VÀ THÊM VALUE + ONCHANGE ĐỂ LƯU DATA */}
             {isModalOpen && (
                 <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
 
                         {/* Modal Header */}
                         <div className={styles.modalHeader}>
-                            <h3 className={styles.modalTitle}>Thêm sản phẩm mới</h3>
+                            <h3 className={styles.modalTitle}>
+                                {editingProduct ? `Chỉnh sửa sản phẩm #${editingProduct.id}` : 'Thêm sản phẩm mới'}
+                            </h3>
                             <button className={styles.modalCloseBtn} onClick={() => setIsModalOpen(false)}>
                                 <span className="material-symbols-outlined">close</span>
                             </button>
@@ -276,27 +348,27 @@ function ProductManagement() {
                             <div className={styles.modalBody}>
                                 <div className={styles.formGroup}>
                                     <label className={styles.formLabel}>Tên sản phẩm *</label>
-                                    <input type="text" className={styles.formInput} placeholder="Ví dụ: Nike Air Force 1" required />
+                                    <input type="text" name="name" value={formData.name} onChange={handleInputChange} className={styles.formInput} placeholder="Ví dụ: Nike Air Force 1" required />
                                 </div>
 
                                 <div className={styles.formRow}>
                                     <div className={styles.formGroup}>
                                         <label className={styles.formLabel}>Danh mục *</label>
-                                        <select className={styles.formSelect} required>
+                                        <select name="categoryId" value={formData.categoryId} onChange={handleInputChange} className={styles.formSelect} required>
                                             <option value="">Chọn danh mục</option>
-                                            <option value="Sneakers">Giày thời trang (Sneakers)</option>
-                                            <option value="Running">Giày chạy bộ</option>
-                                            <option value="Basketball">Giày bóng rổ</option>
+                                            <option value="1">Sneakers</option>
+                                            <option value="2">Running</option>
+                                            <option value="3">Basketball</option>
                                         </select>
                                     </div>
 
                                     <div className={styles.formGroup}>
                                         <label className={styles.formLabel}>Thương hiệu *</label>
-                                        <select className={styles.formSelect} required>
+                                        <select name="brandId" value={formData.brandId} onChange={handleInputChange} className={styles.formSelect} required>
                                             <option value="">Chọn thương hiệu</option>
-                                            <option value="Nike">Nike</option>
-                                            <option value="Adidas">Adidas</option>
-                                            <option value="Jordan">Jordan</option>
+                                            <option value="1">Nike</option>
+                                            <option value="2">Adidas</option>
+                                            <option value="3">Jordan</option>
                                         </select>
                                     </div>
                                 </div>
@@ -304,23 +376,23 @@ function ProductManagement() {
                                 <div className={styles.formRow}>
                                     <div className={styles.formGroup}>
                                         <label className={styles.formLabel}>Mã sản phẩm (SKU) *</label>
-                                        <input type="text" className={styles.formInput} placeholder="NK-AF1-001" required />
+                                        <input type="text" name="sku" value={formData.sku} onChange={handleInputChange} className={styles.formInput} placeholder="NK-AF1-001" required />
                                     </div>
 
                                     <div className={styles.formGroup}>
                                         <label className={styles.formLabel}>Số lượng tồn kho *</label>
-                                        <input type="number" min="0" className={styles.formInput} placeholder="0" required />
+                                        <input type="number" min="0" name="stockQuantity" value={formData.stockQuantity} onChange={handleInputChange} className={styles.formInput} placeholder="0" required />
                                     </div>
 
                                     <div className={styles.formGroup}>
                                         <label className={styles.formLabel}>Giá bán (₫) *</label>
-                                        <input type="text" className={styles.formInput} placeholder="3,500,000" required />
+                                        <input type="number" min="0" name="basePrice" value={formData.basePrice} onChange={handleInputChange} className={styles.formInput} placeholder="3500000" required />
                                     </div>
                                 </div>
 
                                 <div className={styles.formGroup}>
                                     <label className={styles.formLabel}>Đường dẫn hình ảnh (URL)</label>
-                                    <input type="url" className={styles.formInput} placeholder="https://example.com/image.png" />
+                                    <input type="url" name="imageUrl" value={formData.imageUrl} onChange={handleInputChange} className={styles.formInput} placeholder="https://example.com/image.png" />
                                 </div>
                             </div>
 
