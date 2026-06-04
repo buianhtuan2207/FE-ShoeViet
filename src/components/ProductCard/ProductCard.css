@@ -9,6 +9,8 @@
     cursor: pointer;
     height: 100%; /* Giúp các card cao bằng nhau khi nằm trong Grid */
     border: 1px solid #f3f4f6;
+    text-decoration: none;
+    color: inherit;
 }
 
 .product-card:hover {

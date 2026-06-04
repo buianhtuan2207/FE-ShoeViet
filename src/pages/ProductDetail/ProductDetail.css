@@ -17,7 +17,7 @@
 /* --- Container Chính --- */
 .product-detail-container {
     max-width: 1280px;
-    margin: 100px auto;
+    margin: 40px auto;
     font-family: var(--font-sans);
     color: var(--on-surface);
 }

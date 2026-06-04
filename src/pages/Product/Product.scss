@@ -1,0 +1,385 @@
+// ==========================================
+// THIẾT LẬP BIẾN MÀU SẮC & UI (STYLE NIKE/SHOPIFY)
+// ==========================================
+$color-primary: #111111;         // Đen tuyền sang trọng
+$color-bg: #ffffff;              // Trắng nền
+$color-text: #333333;
+$color-text-light: #757575;
+$color-border: #e2e8f0;          // Xám nhạt hiện đại
+$color-hover: #f8fafc;
+$radius-sm: 6px;
+$radius-md: 10px;
+$transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+// ==========================================
+// LAYOUT TỔNG THỂ
+// ==========================================
+.product-page {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: $color-text;
+    background-color: $color-bg;
+
+    * { box-sizing: border-box; }
+
+    // --- HEADER: TIÊU ĐỀ & SẮP XẾP ---
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding-bottom: 24px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+        gap: 20px;
+
+        .header-info {
+            max-width: 700px;
+
+            .page-title {
+                font-size: 2.5rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: -1px;
+                color: $color-primary;
+                margin: 0 0 12px 0;
+            }
+
+            .page-desc {
+                color: $color-text-light;
+                font-size: 1.05rem;
+                line-height: 1.6;
+                margin: 0;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+
+            .result-count {
+                font-weight: 500;
+                color: $color-text-light;
+            }
+
+            .select-wrapper {
+                position: relative;
+
+                .sort-select {
+                    appearance: none;
+                    background: transparent;
+                    border: 1px solid $color-border;
+                    border-radius: $radius-sm;
+                    padding: 12px 40px 12px 16px;
+                    font-size: 0.95rem;
+                    font-weight: 600;
+                    color: $color-primary;
+                    cursor: pointer;
+                    transition: all $transition;
+
+                    &:hover, &:focus {
+                        border-color: $color-primary;
+                        outline: none;
+                    }
+                }
+
+                .select-icon {
+                    position: absolute;
+                    right: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    pointer-events: none;
+                    color: $color-primary;
+                }
+            }
+        }
+    }
+
+    // --- THÂN TRANG: SIDEBAR & LƯỚI SẢN PHẨM ---
+    .page-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 48px;
+
+        // --- SIDEBAR (BỘ LỌC) ---
+        .sidebar {
+            width: 280px; // Tăng nhẹ chiều rộng để bù cho phần padding bên trong
+            flex-shrink: 0;
+            position: sticky;
+            top: 24px;
+
+            // ĐỊNH DẠNG KHUNG VIỀN (CARD STYLE)
+            background-color: #ffffff;
+            border: 1px solid $color-border;
+            border-radius: $radius-md;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); // Đổ bóng nhẹ giúp nổi bật khỏi nền
+
+            .filter-group {
+                margin-bottom: 24px;
+                padding-bottom: 24px;
+                border-bottom: 1px solid $color-border;
+
+                // Xóa viền ở nhóm lọc cuối cùng cho đẹp
+                &:last-of-type {
+                    border-bottom: none;
+                    margin-bottom: 16px;
+                    padding-bottom: 0;
+                }
+
+                .filter-title {
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    color: $color-primary;
+                    margin-bottom: 16px;
+                }
+
+                // 1. Checkbox List (Thương hiệu, Giá)
+                .filter-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+
+                    .filter-checkbox {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        cursor: pointer;
+                        font-size: 0.95rem;
+                        color: $color-text;
+                        transition: color $transition;
+
+                        input[type="checkbox"], input[type="radio"] {
+                            width: 20px;
+                            height: 20px;
+                            cursor: pointer;
+                            accent-color: $color-primary;
+                        }
+
+                        &:hover {
+                            color: $color-primary;
+                            font-weight: 600;
+                        }
+                    }
+                }
+
+                // 2. Màu sắc (Color Swatches)
+                .color-swatches {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 12px;
+
+                    .color-btn {
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        border: 1px solid $color-border;
+                        cursor: pointer;
+                        transition: transform $transition, box-shadow $transition;
+
+                        &:hover {
+                            transform: translateY(-2px) scale(1.05);
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+                        }
+
+                        &.active {
+                            box-shadow: 0 0 0 2px #fff, 0 0 0 4px $color-primary;
+                        }
+                    }
+                }
+
+                // 3. Kích cỡ (Size Grid)
+                .size-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 8px;
+
+                    .size-btn {
+                        padding: 8px 0;
+                        background: #fff;
+                        border: 1px solid $color-border;
+                        border-radius: $radius-sm;
+                        cursor: pointer;
+                        font-weight: 500;
+                        font-size: 0.95rem;
+                        color: $color-text;
+                        transition: all $transition;
+
+                        &:hover {
+                            border-color: $color-primary;
+                            background-color: $color-hover;
+                        }
+
+                        &.active {
+                            background: $color-primary;
+                            color: #fff;
+                            border-color: $color-primary;
+                        }
+                    }
+                }
+            }
+
+            .btn-clear-filter {
+                width: 100%;
+                padding: 12px;
+                background: $color-hover;
+                color: $color-primary;
+                border: 1px solid $color-border;
+                border-radius: $radius-sm;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all $transition;
+
+                &:hover {
+                    background: $color-primary;
+                    color: #fff;
+                    border-color: $color-primary;
+                }
+            }
+        }
+
+        // --- KHU VỰC SẢN PHẨM ---
+        .product-list-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+
+            // Trạng thái trống/lỗi
+            .loading-state, .empty-state {
+                text-align: center;
+                padding: 60px 20px;
+                font-size: 1.1rem;
+                color: $color-text-light;
+                background: $color-hover;
+                border-radius: $radius-md;
+            }
+            .error-state {
+                text-align: center;
+                padding: 40px;
+                color: #dc2626;
+                background: #fef2f2;
+                border-radius: $radius-md;
+                font-weight: 500;
+            }
+
+            // Lưới sản phẩm
+            .product-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 32px 24px;
+                margin-bottom: 48px;
+            }
+
+            // Phân trang
+            .pagination {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 8px;
+                margin-top: auto;
+                padding-top: 32px;
+                border-top: 1px solid $color-border;
+
+                .page-btn {
+                    width: 48px;
+                    height: 48px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: $color-bg;
+                    border: 1px solid $color-border;
+                    border-radius: $radius-sm;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 1.05rem;
+                    color: $color-text;
+                    transition: all $transition;
+
+                    &:hover:not(.disabled):not(.active) {
+                        border-color: $color-primary;
+                        background: $color-hover;
+                    }
+
+                    &.active {
+                        background: $color-primary;
+                        color: $color-bg;
+                        border-color: $color-primary;
+                    }
+
+                    &.disabled {
+                        color: #cbd5e1;
+                        cursor: not-allowed;
+                        background: #f1f5f9;
+                    }
+                }
+
+                .page-dots {
+                    color: $color-text-light;
+                    font-weight: 700;
+                    padding: 0 8px;
+                    letter-spacing: 2px;
+                }
+            }
+        }
+    }
+}
+
+// ==========================================
+// RESPONSIVE CHO ĐIỆN THOẠI & TABLET
+// ==========================================
+@media (max-width: 1024px) {
+    .product-page .page-content {
+        gap: 32px;
+        .sidebar { width: 220px; }
+    }
+}
+
+@media (max-width: 768px) {
+    .product-page {
+        padding: 24px 16px;
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        .page-content {
+            flex-direction: column;
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+                margin-bottom: 32px;
+
+                .filter-group {
+                    margin-bottom: 0;
+                    padding-bottom: 0;
+                    border-bottom: none;
+                }
+
+                .btn-clear-filter { grid-column: 1 / -1; }
+            }
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .product-page .page-content {
+        .sidebar { grid-template-columns: 1fr; }
+        .product-list-container .product-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+}

@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from '../../components/ProductCard';
-import productService from '../../services/ProductSercive';
-import './Product.module.scss';
+import productService from '../../services/ProductService';
+import './Product.scss';
 
 function ProductPage() {
-    // --- 1. KHAI BÁO CÁC STATE QUẢN LÝ DỮ LIỆU TỪ BACKEND ---
-    const [products, setProducts] = useState([]);      // Lưu danh sách sản phẩm thực tế
-    const [loading, setLoading] = useState(true);        // Trạng thái chờ tải dữ liệu
-    const [error, setError] = useState(null);            // Trạng thái lưu thông báo lỗi (nếu có)
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // --- 2. HÀM GỌI API QUA TẦNG SERVICE ---
     const fetchAllProductsData = async () => {
         try {
             setLoading(true);
             setError(null);
-
-            // Gọi hàm từ productService
             const data = await productService.getAllProducts();
             setProducts(data);
         } catch (err) {
@@ -26,23 +22,12 @@ function ProductPage() {
         }
     };
 
-    // --- 3. TRIGGER GỌI API NGAY KHI COMPONENT MOUNT ---
     useEffect(() => {
         fetchAllProductsData();
     }, []);
 
-    // --- 4. HÀM ĐỊNH DẠNG TIỀN TỆ ĐỒNG BỘ VNĐ (Ví dụ: 1500000 -> 1.500.000 ₫) ---
-    const formatCurrency = (value) => {
-        if (!value) return '0 ₫';
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(value);
-    };
-
     return (
         <main className="product-page">
-            {/* Tiêu đề trang / Breadcrumbs */}
             <div className="page-header">
                 <div className="header-info">
                     <h1 className="page-title">Bộ Sưu Tập Nổi Bật</h1>
@@ -51,9 +36,7 @@ function ProductPage() {
                     </p>
                 </div>
 
-                {/* Thanh Sắp Xếp */}
                 <div className="header-actions">
-                    {/* Hiển thị số lượng dựa trên mảng thực tế */}
                     <span className="result-count">Hiển thị {products.length} sản phẩm</span>
                     <div className="select-wrapper">
                         <select className="sort-select" defaultValue="Featured">
@@ -68,119 +51,92 @@ function ProductPage() {
             </div>
 
             <div className="page-content">
-                {/* Bộ lọc Sidebar */}
+                {/* --- SIDEBAR BỘ LỌC TÌM KIẾM --- */}
                 <aside className="sidebar">
+
+                    {/* Lọc theo Thương hiệu */}
                     <div className="filter-group">
                         <h3 className="filter-title">Thương hiệu</h3>
                         <div className="filter-list">
-                            <label className="filter-checkbox">
-                                <input type="checkbox" defaultChecked />
-                                <span>Nike</span>
-                            </label>
-                            <label className="filter-checkbox">
-                                <input type="checkbox" />
-                                <span>Adidas</span>
-                            </label>
-                            <label className="filter-checkbox">
-                                <input type="checkbox" />
-                                <span>Jordan</span>
-                            </label>
+                            <label className="filter-checkbox"><input type="checkbox" defaultChecked /><span>Nike</span></label>
+                            <label className="filter-checkbox"><input type="checkbox" /><span>Adidas</span></label>
+                            <label className="filter-checkbox"><input type="checkbox" /><span>Jordan</span></label>
+                            <label className="filter-checkbox"><input type="checkbox" /><span>Puma</span></label>
                         </div>
                     </div>
 
+                    {/* Lọc theo Khoảng giá */}
                     <div className="filter-group">
-                        <h3 className="filter-title">Kích cỡ (US)</h3>
-                        <div className="size-chips">
-                            <button className="chip">7</button>
-                            <button className="chip active">8</button>
-                            <button className="chip">9</button>
-                            <button className="chip">10</button>
-                            <button className="chip">11</button>
-                            <button className="chip disabled" disabled>12</button>
+                        <h3 className="filter-title">Mức giá</h3>
+                        <div className="filter-list">
+                            <label className="filter-checkbox"><input type="radio" name="price" /><span>Dưới 1.000.000 ₫</span></label>
+                            <label className="filter-checkbox"><input type="radio" name="price" /><span>1.000.000 ₫ - 3.000.000 ₫</span></label>
+                            <label className="filter-checkbox"><input type="radio" name="price" /><span>Trên 3.000.000 ₫</span></label>
                         </div>
                     </div>
 
+                    {/* Lọc theo Màu sắc */}
                     <div className="filter-group">
                         <h3 className="filter-title">Màu sắc</h3>
-                        <div className="color-chips">
-                            <button className="color-btn active" style={{ backgroundColor: '#000' }}></button>
-                            <button className="color-btn" style={{ backgroundColor: '#fff', border: '1px solid #e5e5e5' }}></button>
-                            <button className="color-btn" style={{ backgroundColor: '#e2e2e2' }}></button>
-                            <button className="color-btn" style={{ backgroundColor: '#93000a' }}></button>
+                        <div className="color-swatches">
+                            <button className="color-btn" style={{ backgroundColor: '#000000' }} aria-label="Đen"></button>
+                            <button className="color-btn" style={{ backgroundColor: '#ffffff', border: '1px solid #ddd' }} aria-label="Trắng"></button>
+                            <button className="color-btn" style={{ backgroundColor: '#dc2626' }} aria-label="Đỏ"></button>
+                            <button className="color-btn" style={{ backgroundColor: '#2563eb' }} aria-label="Xanh dương"></button>
+                            <button className="color-btn" style={{ backgroundColor: '#16a34a' }} aria-label="Xanh lá"></button>
+                            <button className="color-btn" style={{ backgroundColor: '#eab308' }} aria-label="Vàng"></button>
                         </div>
                     </div>
 
+                    {/* Lọc theo Kích cỡ (Size) */}
                     <div className="filter-group">
-                        <h3 className="filter-title">Khoảng giá</h3>
-                        <div className="price-grid">
-                            <button className="price-btn">Dưới 500k</button>
-                            <button className="price-btn">500k - 1M</button>
-                            <button className="price-btn active">1M - 2M</button>
-                            <button className="price-btn">Trên 2M</button>
+                        <h3 className="filter-title">Kích cỡ</h3>
+                        <div className="size-grid">
+                            <button className="size-btn">38</button>
+                            <button className="size-btn">39</button>
+                            <button className="size-btn active">40</button>
+                            <button className="size-btn">41</button>
+                            <button className="size-btn">42</button>
+                            <button className="size-btn">43</button>
                         </div>
                     </div>
+
+                    <button className="btn-clear-filter">Xóa tất cả bộ lọc</button>
                 </aside>
 
-                {/* Lưới sản phẩm và phân trang */}
-                <div className="product-list-container" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-
-                    {/* --- TRẠNG THÁI LOADING / ERROR / HIỂN THỊ DỮ LIỆU THẬT --- */}
-                    {loading && (
-                        <div style={{ textAlign: 'center', padding: '40px', fontSize: '1.2rem', color: '#757575' }}>
-                            Đang tải danh sách sản phẩm...
-                        </div>
-                    )}
-
-                    {error && (
-                        <div style={{ textAlign: 'center', padding: '40px', color: '#93000a', fontWeight: '500' }}>
-                            {error}
-                        </div>
-                    )}
+                {/* --- KHU VỰC HIỂN THỊ SẢN PHẨM --- */}
+                <div className="product-list-container">
+                    {loading && <div className="loading-state">Đang tải danh sách sản phẩm...</div>}
+                    {error && <div className="error-state">{error}</div>}
 
                     {!loading && !error && (
                         <div className="product-grid">
                             {products.length === 0 ? (
-                                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px', color: '#757575' }}>
-                                    Không có sản phẩm nào trong hệ thống.
+                                <div className="empty-state">
+                                    Không tìm thấy sản phẩm nào phù hợp với tiêu chí của bạn.
                                 </div>
                             ) : (
                                 products.map((product) => (
-                                    <ProductCard
-                                        key={product.id}
-                                        data={{
-                                            id: product.id,
-                                            name: product.name,
-                                            category: product.categoryName || "Giày thể thao",
-                                            // Sử dụng hàm formatCurrency để chuyển đổi số thành định dạng tiền tệ Việt Nam mượt mà
-                                            price: formatCurrency(product.basePrice),
-                                            img: product.imageUrl || "https://placehold.co/300"
-                                        }}
-                                    />
+                                    <ProductCard key={product.id} data={product} />
                                 ))
                             )}
                         </div>
                     )}
 
-                    {/* Phân trang bằng Tiếng Việt */}
+                    {/* Phân trang */}
                     <div className="pagination">
                         <button className="page-btn disabled" disabled aria-label="Trang trước">
                             <span className="material-symbols-outlined">chevron_left</span>
                         </button>
-
                         <button className="page-btn active">1</button>
                         <button className="page-btn">2</button>
-                        <button className="page-btn">3</button>
-
                         <span className="page-dots">...</span>
-
-                        <button className="page-btn">12</button>
-
+                        <button className="page-btn">8</button>
                         <button className="page-btn" aria-label="Trang tiếp theo">
                             <span className="material-symbols-outlined">chevron_right</span>
                         </button>
                     </div>
                 </div>
-
             </div>
         </main>
     );
