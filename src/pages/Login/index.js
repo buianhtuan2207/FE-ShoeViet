@@ -110,7 +110,7 @@ function Login() {
                             <label htmlFor="password" className={styles.noMarginBottom}>
                                 Mật khẩu
                             </label>
-                            <Link to="/forgotpw">Quên mật khẩu?</Link>
+                            <Link to="/forgot-password">Quên mật khẩu?</Link>
                         </div>
                         <div className={styles.inputWrapper}>
                             <input

@@ -1,8 +1,53 @@
-import React from 'react';
-import { Link } from 'react-router-dom'; // Dùng để chuyển trang về Login
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './ForgotPassword.module.scss';
+import authService from '../../services/AuthService';
 
 function ForgotPassword() {
+    const navigate = useNavigate();
+
+    // 1. Quản lý trạng thái Email, Trạng thái xoay đợi và Thông báo
+    const [email, setEmail] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState({ type: '', text: '' });
+
+    // 2. Hàm xử lý khi người dùng nhấn nút Gửi mã
+    const handleSubmit = async (e) => {
+        e.preventDefault(); // Chặn hành động reload trang mặc định của form
+
+        if (!email.trim()) {
+            setMessage({ type: 'error', text: 'Vui lòng nhập địa chỉ Email!' });
+            return;
+        }
+
+        setIsLoading(true);
+        setMessage({ type: '', text: '' });
+
+        try {
+            // Gọi API Spring Boot gửi mail thông qua authService
+            const responseMsg = await authService.forgotPassword(email);
+
+            // Hiển thị thông báo thành công từ Backend trả về
+            setMessage({ type: 'success', text: responseMsg || 'Mã OTP đã được gửi thành công!' });
+
+            // Đợi 1.5 giây cho người dùng đọc thông báo rồi tự động nhảy sang trang nhập OTP
+            setTimeout(() => {
+                navigate('/verify-otp', {
+                    state: {
+                        email: email,
+                        isForgotPassword: true // Đánh dấu sang trang OTP biết đây là luồng quên mật khẩu
+                    }
+                });
+            }, 1500);
+
+        } catch (error) {
+            // Bắt các lỗi như "Email này không tồn tại trên hệ thống!" từ Spring Boot quăng ra
+            setMessage({ type: 'error', text: error.message });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <main className={styles.mainContainer}>
             <div className={styles.card}>
@@ -16,7 +61,24 @@ function ForgotPassword() {
                     </p>
                 </div>
 
-                <form className={styles.form}>
+                {/* Khối hiển thị thông báo lỗi hoặc thành công */}
+                {message.text && (
+                    <div style={{
+                        padding: '12px',
+                        borderRadius: '6px',
+                        marginBottom: '15px',
+                        fontSize: '14px',
+                        textAlign: 'center',
+                        backgroundColor: message.type === 'error' ? '#fee2e2' : '#d1fae5',
+                        color: message.type === 'error' ? '#b91c1c' : '#047857',
+                        border: `1px solid ${message.type === 'error' ? '#fca5a5' : '#6ee7b7'}`
+                    }}>
+                        {message.text}
+                    </div>
+                )}
+
+                {/* BỔ SUNG: Gắn onSubmit vào thẻ form */}
+                <form className={styles.form} onSubmit={handleSubmit}>
                     <div className={styles.inputGroup}>
                         <label htmlFor="email">ĐỊA CHỈ EMAIL</label>
                         <input
@@ -25,11 +87,19 @@ function ForgotPassword() {
                             placeholder="example@email.com"
                             required
                             type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)} // Lưu dữ liệu khi gõ vào state
+                            disabled={isLoading}
                         />
                     </div>
 
-                    <button className={styles.submitBtn} type="button">
-                        GỬI MÃ XÁC THỰC
+                    {/* SỬA: Thay đổi sang type="submit" và xử lý trạng thái disabled */}
+                    <button
+                        className={styles.submitBtn}
+                        type="submit"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'ĐANG GỬI MÃ...' : 'GỬI MÃ XÁC THỰC'}
                     </button>
                 </form>
 

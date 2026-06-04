@@ -1,99 +1,180 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './ProductManagement.module.scss';
-
-const productsData = [
-    {
-        id: 1,
-        name: 'Nike Air Max Pre-Day',
-        type: 'Giày chạy bộ',
-        brand: 'Nike',
-        sku: 'NK-MAX-2024',
-        stock: 42,
-        price: '3,450,000₫',
-        status: 'Còn hàng',
-        statusKey: 'inStock',
-        imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuArbvkkxa-D18gyoIv73Xr63aDtF6spjRFHDs5k6CryiW4ZdRiZqmIrhuWW2T7E80H_SxJOHujyBUk7lUKSCWaSegufA_1LiY3MZf3ByR2YL9ZFE353LnehaMQnel6vyOaSPVKZw7Li7gNcMVjBzoO_1nbMqywX9igDZQ7n84TdZkihv1KRGkE5xsNFMDdoOzfSTRAqmxGSEgESxLzv2LhjakIvt5XhllOfGl0VlHL92FE0HckhjnEqHGn6OAEfP0SpjiMvrsaaTSY'
-    },
-    {
-        id: 2,
-        name: 'Nike Dunk High Pastel',
-        type: 'Giày thời trang',
-        brand: 'Nike',
-        sku: 'NK-DUNK-092',
-        stock: 0,
-        price: '2,890,000₫',
-        status: 'Hết hàng',
-        statusKey: 'outOfStock',
-        imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCsRk26-oyQQ4YiIgskIhE6mSp5mYdl-_PCJuXVT7KhLm36lATt473Ru3vzwNZNBdwDrhU3aqp96neqPS6nCGOabj_drAVUegIMZwjogQPdJgoY-hP858ZXpegDHTuKO3xk-2F9fmq90op7SQYvb-8LO23bS9XNX2Tb2Kweypn9dteAhkTSh0FVEzdUp-NFZVr-bTqOIop0-bEGA2W1l1ctLQGw00vPwr9stpZPFoCOiIk3G09JAxGuVxs6prAa8bwI5sNm28_-0Sk'
-    },
-    {
-        id: 3,
-        name: 'Adidas Ultraboost 22',
-        type: 'Giày thể thao',
-        brand: 'Adidas',
-        sku: 'AD-UB-22-NV',
-        stock: 115,
-        price: '4,200,000₫',
-        status: 'Còn hàng',
-        statusKey: 'inStock',
-        imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDgoC63-dXO1_KMrE7RdHTB94sOq_YO1rCtl1KBg3c_qPheXgPvGhx7tP7jTYv9ZP8NbpHCcOT4KI8i_lH_Iq4XgCjjynMKNgqAbPujCF8Cc3S8oJ8QedrAwXLaEPjPuoWscxBXLjYwaTZc94XnlKEWPO9dVRfEE_9dCMRZa5EsDa-5Ni7g7-GwFC5ljX5MZVLhPOr3URirJujp0svckdpfNVh9TwmImln_kg-dCPq6vdrFo-vKx7Vq0NaZ9bWnxcG0rsK6eGPnrkM'
-    },
-    {
-        id: 4,
-        name: 'Jordan 1 Retro High',
-        type: 'Bóng rổ',
-        brand: 'Jordan',
-        sku: 'JD-1-RET-01',
-        stock: 12,
-        price: '12,500,000₫',
-        status: 'Còn hàng',
-        statusKey: 'inStock',
-        imgUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDK1Vsf3rrKn0sFHGtvv1FCh_N2JDSjDOsaEAZwlj4lY16e5vT2xICMVeQPwSDsocCKiL5pj4zNJIJReX-pn2ph-h9OKXoVd2VHv1fpZprYSYhpTU4Vp1kdufG5Z_-xL7V_P0IxMKNlhfzy1x8IuXaogDugTsDYR5-CGTq6TYZrGOEuO6YSGHcEp6u2_c_ti85t9ozhAEh3KTTpSkg4AEbsZ5Y5MLA3O_7zNmUpaV0G0FukS4OkZdYoO0MCg19bI2RrJaZO9qwfatk'
-    }
-];
-
-const statsBentoData = [
-    {
-        label: 'Tổng sản phẩm',
-        value: '1,284',
-        icon: 'package_2',
-        themeClass: 'primaryCard',
-        iconTheme: 'primary',
-        trendText: '+12%',
-        trendClass: 'positive',
-        trendIcon: 'trending_up'
-    },
-    {
-        label: 'Sắp hết hàng',
-        value: '18',
-        icon: 'running_with_errors',
-        themeClass: 'errorCard',
-        iconTheme: 'error',
-        trendText: 'Cần nhập',
-        trendClass: 'warning',
-        trendIcon: 'warning'
-    },
-    {
-        label: 'Tỷ lệ xoay vòng',
-        value: '4.2x',
-        icon: 'avg_pace',
-        themeClass: 'primaryCard',
-        iconTheme: 'secondary',
-        trendText: 'Chu kỳ: 30 ngày',
-        trendClass: 'neutral'
-    }
-];
+import productService from '../../../../services/ProductSercive';
 
 function ProductManagement() {
-    // State quản lý trạng thái ẩn/hiện của Popup Modal
+    // --- CÁC STATE QUẢN LÝ DỮ LIỆU ---
+    const [products, setProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null);
 
-    // Hàm xử lý khi gửi form (Submit)
-    const handleFormSubmit = (e) => {
+    // --- STATE QUẢN LÝ BỘ LỌC (MỚI THÊM) ---
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('Tất cả danh mục');
+    const [selectedBrand, setSelectedBrand] = useState('Tất cả thương hiệu');
+
+    // State quản lý form điền dữ liệu
+    const [formData, setFormData] = useState({
+        name: '',
+        categoryId: '',
+        brandId: '',
+        sku: '',
+        stockQuantity: '',
+        basePrice: '',
+        imageUrl: ''
+    });
+
+    // 1. Hàm tải danh sách sản phẩm từ Spring Boot
+    const loadProducts = async () => {
+        setIsLoading(true);
+        try {
+            const data = await productService.getAllProducts();
+            setProducts(data);
+        } catch (error) {
+            console.error("Lỗi lấy danh sách sản phẩm:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadProducts();
+    }, []);
+
+    // --- LOGIC TÍNH TOÁN THỐNG KÊ ĐỘNG (BENTO) ---
+    const totalProductsCount = products.length;
+
+    // Đếm số sản phẩm có tổng kho dưới hoặc bằng 5 (Sắp hết hàng)
+    const lowStockCount = products.filter(product => {
+        const totalStock = product.variants ? product.variants.reduce((sum, v) => sum + (v.stockQuantity || 0), 0) : 0;
+        return totalStock <= 5;
+    }).length;
+
+    // Tính tỷ lệ trung bình giá trị sản phẩm hoặc giữ số liệu chu kỳ cố định cho bento
+    const statsBentoData = [
+        {
+            label: 'Tổng dòng sản phẩm',
+            value: totalProductsCount.toLocaleString(),
+            icon: 'package_2',
+            themeClass: 'primaryCard',
+            iconTheme: 'primary',
+            trendText: 'Hệ thống thực',
+            trendClass: 'positive',
+            trendIcon: 'sync'
+        },
+        {
+            label: 'Sắp hết hàng (≤ 5 chiếc)',
+            value: lowStockCount.toLocaleString(),
+            icon: 'running_with_errors',
+            themeClass: lowStockCount > 0 ? 'errorCard' : 'primaryCard',
+            iconTheme: lowStockCount > 0 ? 'error' : 'secondary',
+            trendText: lowStockCount > 0 ? 'Cần nhập hàng' : 'An toàn',
+            trendClass: lowStockCount > 0 ? 'warning' : 'positive',
+            trendIcon: lowStockCount > 0 ? 'warning' : 'check_circle'
+        },
+        {
+            label: 'Danh mục hiện có',
+            value: '4 nhóm',
+            icon: 'avg_pace',
+            themeClass: 'primaryCard',
+            iconTheme: 'secondary',
+            trendText: 'Chu kỳ kiểm kho: 30 ngày',
+            trendClass: 'neutral'
+        }
+    ];
+
+    // --- LOGIC LỌC DỮ LIỆU SẢN PHẨM ---
+    const filteredProducts = products.filter(product => {
+        // 1. Tìm kiếm theo Tên sản phẩm hoặc SKU
+        const firstVariantSku = product.variants?.[0]?.sku || '';
+        const matchesSearch =
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            firstVariantSku.toLowerCase().includes(searchTerm.toLowerCase());
+
+        // 2. Lọc theo tên Danh mục (Khớp tên trả về từ BE như categoryName)
+        const matchesCategory =
+            selectedCategory === 'Tất cả danh mục' ||
+            (product.categoryName && product.categoryName.toLowerCase() === selectedCategory.toLowerCase());
+
+        // 3. Lọc theo tên Thương hiệu (Khớp brandName)
+        const matchesBrand =
+            selectedBrand === 'Tất cả thương hiệu' ||
+            (product.brandName && product.brandName.toLowerCase() === selectedBrand.toLowerCase());
+
+        return matchesSearch && matchesCategory && matchesBrand;
+    });
+
+    // 2. Hàm mở modal
+    const openModal = (product = null) => {
+        if (product) {
+            setEditingProduct(product);
+            setFormData({
+                name: product.name,
+                categoryId: product.categoryId || '1',
+                brandId: product.brandId || '1',
+                sku: product.variants?.[0]?.sku || '',
+                stockQuantity: product.variants?.[0]?.stockQuantity || 0,
+                basePrice: product.basePrice,
+                imageUrl: product.imageUrl || ''
+            });
+        } else {
+            setEditingProduct(null);
+            setFormData({ name: '', categoryId: '', brandId: '', sku: '', stockQuantity: '', basePrice: '', imageUrl: '' });
+        }
+        setIsModalOpen(true);
+    };
+
+    // 3. Hàm xử lý thay đổi dữ liệu trong ô input form
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // 4. Hàm gửi form (Submit)
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
-        // Xử lý thêm logic thêm sản phẩm ở đây (gọi API...)
-        alert('Gửi thông tin sản phẩm thành công!');
-        setIsModalOpen(false); // Đóng modal sau khi hoàn tất
+
+        const payload = {
+            name: formData.name,
+            description: `Mã SKU: ${formData.sku}`,
+            basePrice: parseFloat(formData.basePrice) || 0,
+            imageUrl: formData.imageUrl,
+            categoryId: parseInt(formData.categoryId) || 1,
+            brandId: parseInt(formData.brandId) || 1,
+            galleryImages: []
+        };
+
+        try {
+            if (editingProduct) {
+                await productService.updateProduct(editingProduct.id, payload);
+                alert('Cập nhật thông tin sản phẩm thành công!');
+            } else {
+                await productService.addProduct(payload);
+                alert('Thêm sản phẩm mới thành công!');
+            }
+            setIsModalOpen(false);
+            loadProducts();
+        } catch (error) {
+            alert('Có lỗi xảy ra: ' + error.message);
+        }
+    };
+
+    // 5. Hàm xử lý Xóa sản phẩm
+    const handleDeleteProduct = async (id, name) => {
+        if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}" không?`)) {
+            try {
+                const msg = await productService.deleteProduct(id);
+                alert(msg);
+                loadProducts();
+            } catch (error) {
+                alert('Xóa thất bại: ' + error.message);
+            }
+        }
+    };
+
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
     };
 
     return (
@@ -106,13 +187,13 @@ function ProductManagement() {
                         <h2 className={styles.pageTitle}>Quản lý sản phẩm</h2>
                         <p className={styles.pageSubtitle}>Danh sách tất cả giày và phụ kiện hiện có trong hệ thống.</p>
                     </div>
-                    <button className={styles.addBtn} onClick={() => setIsModalOpen(true)}>
+                    <button className={styles.addBtn} onClick={() => openModal(null)}>
                         <span className="material-symbols-outlined">add</span>
                         Thêm sản phẩm mới
                     </button>
                 </div>
 
-                {/* Contextual Stats Cards (Bento Style) */}
+                {/* Contextual Stats Cards (Bento Style) - Sử dụng data thật */}
                 <div className={styles.statsGrid}>
                     {statsBentoData.map((card, idx) => (
                         <div key={idx} className={`${styles.statCard} ${styles[card.themeClass]}`}>
@@ -131,40 +212,55 @@ function ProductManagement() {
                     ))}
                 </div>
 
-                {/* Filters Section */}
+                {/* Filters Section - Đã gắn State điều khiển */}
                 <div className={styles.filtersBar}>
+                    {/* Thanh tìm kiếm nhanh mới bổ sung */}
+                    <div className={styles.searchWrapper} style={{ display: 'flex', alignItems: 'center', backgroundColor: '#fff', padding: '0 10px', borderRadius: '8px', border: '1px solid #e0e0e0', marginRight: '12px', flex: 1 }}>
+                        <span className="material-symbols-outlined" style={{ color: '#757575', marginRight: '6px' }}>search</span>
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm theo tên, mã SKU..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{ border: 'none', outline: 'none', padding: '8px 0', width: '100%', fontSize: '14px' }}
+                        />
+                    </div>
+
                     <div className={styles.selectWrapper}>
                         <span className={`${styles.filterIcon} material-symbols-outlined`}>category</span>
-                        <select className={styles.selectInput} defaultValue="Tất cả danh mục">
-                            <option>Tất cả danh mục</option>
-                            <option>Sneakers</option>
-                            <option>Running</option>
-                            <option>Basketball</option>
-                            <option>Casual</option>
+                        <select
+                            className={styles.selectInput}
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                        >
+                            <option value="Tất cả danh mục">Tất cả danh mục</option>
+                            <option value="Sneakers">Sneakers</option>
+                            <option value="Running">Running</option>
+                            <option value="Basketball">Basketball</option>
+                            <option value="Casual">Casual</option>
                         </select>
                     </div>
 
                     <div className={styles.selectWrapper}>
                         <span className={`${styles.filterIcon} material-symbols-outlined`}>brand_family</span>
-                        <select className={styles.selectInput} defaultValue="Tất cả thương hiệu">
-                            <option>Tất cả thương hiệu</option>
-                            <option>Nike</option>
-                            <option>Adidas</option>
-                            <option>Jordan</option>
-                            <option>Yeezy</option>
+                        <select
+                            className={styles.selectInput}
+                            value={selectedBrand}
+                            onChange={(e) => setSelectedBrand(e.target.value)}
+                        >
+                            <option value="Tất cả thương hiệu">Tất cả thương hiệu</option>
+                            <option value="Nike">Nike</option>
+                            <option value="Adidas">Adidas</option>
+                            <option value="Jordan">Jordan</option>
+                            <option value="Yeezy">Yeezy</option>
                         </select>
                     </div>
 
                     <div className={styles.divider}></div>
 
-                    <div className={styles.sortGroup}>
-                        <span className={styles.sortLabel}>Sắp xếp:</span>
-                        <button className={styles.sortBtn}>Mới nhất</button>
-                    </div>
-
-                    <button className={styles.advancedFilterBtn}>
-                        <span className="material-symbols-outlined">filter_list</span>
-                        Lọc nâng cao
+                    <button className={styles.advancedFilterBtn} onClick={loadProducts} title="Làm mới danh sách">
+                        <span className="material-symbols-outlined">refresh</span>
+                        Làm mới
                     </button>
                 </div>
 
@@ -184,53 +280,69 @@ function ProductManagement() {
                             </tr>
                             </thead>
                             <tbody className={styles.tbody}>
-                            {productsData.map((product) => (
-                                <tr key={product.id} className={styles.tr}>
-                                    <td className={styles.td}>
-                                        <div className={styles.imgCellWrapper}>
-                                            <img
-                                                src={product.imgUrl}
-                                                alt={product.name}
-                                                className={styles.productImg}
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className={styles.td}>
-                                        <p className={styles.productName}>{product.name}</p>
-                                        <p className={styles.productMeta}>{product.type} • {product.brand}</p>
-                                    </td>
-                                    <td className={styles.td}>
-                                        <span className={styles.skuBadge}>{product.sku}</span>
-                                    </td>
-                                    <td className={`${styles.td} ${styles.textCenter}`}>
-                                        <p className={`${styles.stockCount} ${product.stock === 0 ? styles.outOfStock : ''}`}>
-                                            {product.stock}
-                                        </p>
-                                        <p className={styles.stockUnit}>Chiếc</p>
-                                    </td>
-                                    <td className={styles.td}>
-                                        <span className={styles.priceText}>{product.price}</span>
-                                    </td>
-                                    <td className={styles.td}>
-                                        <span className={`${styles.statusBadge} ${styles[product.statusKey]}`}>
-                                            {product.status}
-                                        </span>
-                                    </td>
-                                    <td className={`${styles.td} ${styles.textRight}`}>
-                                        <div className={styles.actionsWrapper}>
-                                            <button className={styles.actionBtn} title="Cập nhật kho">
-                                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>inventory</span>
-                                            </button>
-                                            <button className={styles.actionBtn} title="Chỉnh sửa">
-                                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
-                                            </button>
-                                            <button className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Xóa">
-                                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                            {isLoading ? (
+                                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>Đang tải dữ liệu từ server...</td></tr>
+                            ) : filteredProducts.length === 0 ? (
+                                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>Không có sản phẩm nào phù hợp với bộ lọc tìm kiếm.</td></tr>
+                            ) : (
+                                // Render dựa trên danh sách filteredProducts sau lọc
+                                filteredProducts.map((product) => {
+                                    const firstVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+                                    const totalStock = product.variants ? product.variants.reduce((sum, v) => sum + (v.stockQuantity || 0), 0) : 0;
+                                    const skuDisplay = firstVariant?.sku || `PROD-${product.id}`;
+                                    const statusText = totalStock > 0 ? 'Còn hàng' : 'Hết hàng';
+                                    const statusClass = totalStock > 0 ? 'inStock' : 'outOfStock';
+
+                                    return (
+                                        <tr key={product.id} className={styles.tr}>
+                                            <td className={styles.td}>
+                                                <div className={styles.imgCellWrapper}>
+                                                    <img
+                                                        src={product.imageUrl || 'https://placehold.co/50'}
+                                                        alt={product.name}
+                                                        className={styles.productImg}
+                                                        onError={(e) => { e.target.src = 'https://placehold.co/50'; }}
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className={styles.td}>
+                                                <p className={styles.productName}>{product.name}</p>
+                                                <p className={styles.productMeta}>{product.categoryName || 'Giày'} • {product.brandName || 'Chính hãng'}</p>
+                                            </td>
+                                            <td className={styles.td}>
+                                                <span className={styles.skuBadge}>{skuDisplay}</span>
+                                            </td>
+                                            <td className={`${styles.td} ${styles.textCenter}`}>
+                                                <p className={`${styles.stockCount} ${totalStock === 0 ? styles.outOfStock : ''}`}>
+                                                    {totalStock}
+                                                </p>
+                                                <p className={styles.stockUnit}>Chiếc</p>
+                                            </td>
+                                            <td className={styles.td}>
+                                                <span className={styles.priceText}>{formatCurrency(product.basePrice)}</span>
+                                            </td>
+                                            <td className={styles.td}>
+                                                <span className={`${styles.statusBadge} ${styles[statusClass]}`}>
+                                                    {statusText}
+                                                </span>
+                                            </td>
+                                            <td className={`${styles.td} ${styles.textRight}`}>
+                                                <div className={styles.actionsWrapper}>
+                                                    <button className={styles.actionBtn} title="Cập nhật kho">
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>inventory</span>
+                                                    </button>
+                                                    <button className={styles.actionBtn} title="Chỉnh sửa" onClick={() => openModal(product)}>
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
+                                                    </button>
+                                                    <button className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Xóa" onClick={() => handleDeleteProduct(product.id, product.name)}>
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
                             </tbody>
                         </table>
                     </div>
@@ -238,17 +350,13 @@ function ProductManagement() {
                     {/* Pagination Footer */}
                     <div className={styles.pagination}>
                         <p className={styles.pageText}>
-                            Hiển thị <span>1 - 10</span> trong số <span>245</span> sản phẩm
+                            Hiển thị <span>1 - {filteredProducts.length}</span> trong số <span>{filteredProducts.length}</span> sản phẩm phù hợp
                         </p>
                         <div className={styles.pageControls}>
                             <button className={styles.pageBtn} disabled>
                                 <span className="material-symbols-outlined">chevron_left</span>
                             </button>
                             <button className={`${styles.pageBtn} ${styles.active}`}>1</button>
-                            <button className={styles.pageBtn}>2</button>
-                            <button className={styles.pageBtn}>3</button>
-                            <span className={styles.ellipsis}>...</span>
-                            <button className={styles.pageBtn}>25</button>
                             <button className={styles.pageBtn}>
                                 <span className="material-symbols-outlined">chevron_right</span>
                             </button>
@@ -262,41 +370,40 @@ function ProductManagement() {
             {isModalOpen && (
                 <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-
-                        {/* Modal Header */}
                         <div className={styles.modalHeader}>
-                            <h3 className={styles.modalTitle}>Thêm sản phẩm mới</h3>
+                            <h3 className={styles.modalTitle}>
+                                {editingProduct ? `Chỉnh sửa sản phẩm #${editingProduct.id}` : 'Thêm sản phẩm mới'}
+                            </h3>
                             <button className={styles.modalCloseBtn} onClick={() => setIsModalOpen(false)}>
                                 <span className="material-symbols-outlined">close</span>
                             </button>
                         </div>
 
-                        {/* Modal Form Content */}
                         <form onSubmit={handleFormSubmit}>
                             <div className={styles.modalBody}>
                                 <div className={styles.formGroup}>
                                     <label className={styles.formLabel}>Tên sản phẩm *</label>
-                                    <input type="text" className={styles.formInput} placeholder="Ví dụ: Nike Air Force 1" required />
+                                    <input type="text" name="name" value={formData.name} onChange={handleInputChange} className={styles.formInput} placeholder="Ví dụ: Nike Air Force 1" required />
                                 </div>
 
                                 <div className={styles.formRow}>
                                     <div className={styles.formGroup}>
                                         <label className={styles.formLabel}>Danh mục *</label>
-                                        <select className={styles.formSelect} required>
+                                        <select name="categoryId" value={formData.categoryId} onChange={handleInputChange} className={styles.formSelect} required>
                                             <option value="">Chọn danh mục</option>
-                                            <option value="Sneakers">Giày thời trang (Sneakers)</option>
-                                            <option value="Running">Giày chạy bộ</option>
-                                            <option value="Basketball">Giày bóng rổ</option>
+                                            <option value="1">Sneakers</option>
+                                            <option value="2">Running</option>
+                                            <option value="3">Basketball</option>
                                         </select>
                                     </div>
 
                                     <div className={styles.formGroup}>
                                         <label className={styles.formLabel}>Thương hiệu *</label>
-                                        <select className={styles.formSelect} required>
+                                        <select name="brandId" value={formData.brandId} onChange={handleInputChange} className={styles.formSelect} required>
                                             <option value="">Chọn thương hiệu</option>
-                                            <option value="Nike">Nike</option>
-                                            <option value="Adidas">Adidas</option>
-                                            <option value="Jordan">Jordan</option>
+                                            <option value="1">Nike</option>
+                                            <option value="2">Adidas</option>
+                                            <option value="3">Jordan</option>
                                         </select>
                                     </div>
                                 </div>
@@ -304,37 +411,31 @@ function ProductManagement() {
                                 <div className={styles.formRow}>
                                     <div className={styles.formGroup}>
                                         <label className={styles.formLabel}>Mã sản phẩm (SKU) *</label>
-                                        <input type="text" className={styles.formInput} placeholder="NK-AF1-001" required />
+                                        <input type="text" name="sku" value={formData.sku} onChange={handleInputChange} className={styles.formInput} placeholder="NK-AF1-001" required />
                                     </div>
 
                                     <div className={styles.formGroup}>
                                         <label className={styles.formLabel}>Số lượng tồn kho *</label>
-                                        <input type="number" min="0" className={styles.formInput} placeholder="0" required />
+                                        <input type="number" min="0" name="stockQuantity" value={formData.stockQuantity} onChange={handleInputChange} className={styles.formInput} placeholder="0" required />
                                     </div>
 
                                     <div className={styles.formGroup}>
                                         <label className={styles.formLabel}>Giá bán (₫) *</label>
-                                        <input type="text" className={styles.formInput} placeholder="3,500,000" required />
+                                        <input type="number" min="0" name="basePrice" value={formData.basePrice} onChange={handleInputChange} className={styles.formInput} placeholder="3500000" required />
                                     </div>
                                 </div>
 
                                 <div className={styles.formGroup}>
                                     <label className={styles.formLabel}>Đường dẫn hình ảnh (URL)</label>
-                                    <input type="url" className={styles.formInput} placeholder="https://example.com/image.png" />
+                                    <input type="url" name="imageUrl" value={formData.imageUrl} onChange={handleInputChange} className={styles.formInput} placeholder="https://example.com/image.png" />
                                 </div>
                             </div>
 
-                            {/* Modal Footer Actions */}
                             <div className={styles.modalFooter}>
-                                <button type="button" className={styles.cancelBtn} onClick={() => setIsModalOpen(false)}>
-                                    Hủy bỏ
-                                </button>
-                                <button type="submit" className={styles.submitBtn}>
-                                    Xác nhận lưu
-                                </button>
+                                <button type="button" className={styles.cancelBtn} onClick={() => setIsModalOpen(false)}>Hủy bỏ</button>
+                                <button type="submit" className={styles.submitBtn}>Xác nhận lưu</button>
                             </div>
                         </form>
-
                     </div>
                 </div>
             )}
