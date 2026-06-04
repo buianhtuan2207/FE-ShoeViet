@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import ProductCard from '../../components/ProductCard';
 import brandService from '../../services/BrandService';
 import categoryService from '../../services/CategoryService';
-import productService from '../../services/ProductSercive';
+import productService from '../../services/ProductService';
 import './Home.css';
 
 const TECH_FEATURES = [

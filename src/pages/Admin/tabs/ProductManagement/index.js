@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ProductManagement.module.scss';
-import productService from '../../../../services/ProductSercive';
+import productService from '../../../../services/ProductService';
 
 function ProductManagement() {
     // --- CÁC STATE QUẢN LÝ DỮ LIỆU ---

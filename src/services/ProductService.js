@@ -13,6 +13,12 @@ const productService = {
         return response.data;
     },
 
+    // Lấy chi tiết một sản phẩm theo ID
+    getProductById: async (id) => {
+        const response = await API.get(`/products/${id}`);
+        return response.data;
+    },
+
     // 3. Cập nhật sản phẩm (Tự động đính token Admin)
     updateProduct: async (id, productData) => {
         const response = await API.put(`/products/${id}`, productData);
