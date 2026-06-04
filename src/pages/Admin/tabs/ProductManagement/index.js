@@ -1,59 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ProductManagement.module.scss';
-import productService from '../../../../services/ProductSercive'; // Đảm bảo bạn đã tạo file service ở bước trước
-
-// GIỮ NGUYÊN data bento stats của bạn
-const statsBentoData = [
-    {
-        label: 'Tổng sản phẩm',
-        value: '1,284',
-        icon: 'package_2',
-        themeClass: 'primaryCard',
-        iconTheme: 'primary',
-        trendText: '+12%',
-        trendClass: 'positive',
-        trendIcon: 'trending_up'
-    },
-    {
-        label: 'Sắp hết hàng',
-        value: '18',
-        icon: 'running_with_errors',
-        themeClass: 'errorCard',
-        iconTheme: 'error',
-        trendText: 'Cần nhập',
-        trendClass: 'warning',
-        trendIcon: 'warning'
-    },
-    {
-        label: 'Tỷ lệ xoay vòng',
-        value: '4.2x',
-        icon: 'avg_pace',
-        themeClass: 'primaryCard',
-        iconTheme: 'secondary',
-        trendText: 'Chu kỳ: 30 ngày',
-        trendClass: 'neutral'
-    }
-];
+import productService from '../../../../services/ProductSercive';
 
 function ProductManagement() {
-    // --- BỔ SUNG CÁC STATE QUẢN LÝ DỮ LIỆU THẬT ---
-    const [products, setProducts] = useState([]); // Thay thế cho mảng productsData ảo
+    // --- CÁC STATE QUẢN LÝ DỮ LIỆU ---
+    const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingProduct, setEditingProduct] = useState(null); // null = Thêm mới, có giá trị = Sửa
+    const [editingProduct, setEditingProduct] = useState(null);
 
-    // State quản lý form điền dữ liệu (khớp hoàn toàn với các ô input trong Modal của bạn)
+    // --- STATE QUẢN LÝ BỘ LỌC (MỚI THÊM) ---
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('Tất cả danh mục');
+    const [selectedBrand, setSelectedBrand] = useState('Tất cả thương hiệu');
+
+    // State quản lý form điền dữ liệu
     const [formData, setFormData] = useState({
         name: '',
         categoryId: '',
         brandId: '',
-        sku: '',          // Bạn có thể lưu sku vào description hoặc xử lý tùy BE
-        stockQuantity: '', // Đồng bộ số lượng tồn kho
-        basePrice: '',     // Đồng bộ giá bán cơ bản
-        imageUrl: ''       // Đường dẫn hình ảnh URL
+        sku: '',
+        stockQuantity: '',
+        basePrice: '',
+        imageUrl: ''
     });
-
-    // --- BỔ SUNG CÁC HÀM GỌI API ---
 
     // 1. Hàm tải danh sách sản phẩm từ Spring Boot
     const loadProducts = async () => {
@@ -72,14 +42,77 @@ function ProductManagement() {
         loadProducts();
     }, []);
 
-    // 2. Hàm mở modal (Xử lý cho cả nút Thêm mới và nút Sửa)
+    // --- LOGIC TÍNH TOÁN THỐNG KÊ ĐỘNG (BENTO) ---
+    const totalProductsCount = products.length;
+
+    // Đếm số sản phẩm có tổng kho dưới hoặc bằng 5 (Sắp hết hàng)
+    const lowStockCount = products.filter(product => {
+        const totalStock = product.variants ? product.variants.reduce((sum, v) => sum + (v.stockQuantity || 0), 0) : 0;
+        return totalStock <= 5;
+    }).length;
+
+    // Tính tỷ lệ trung bình giá trị sản phẩm hoặc giữ số liệu chu kỳ cố định cho bento
+    const statsBentoData = [
+        {
+            label: 'Tổng dòng sản phẩm',
+            value: totalProductsCount.toLocaleString(),
+            icon: 'package_2',
+            themeClass: 'primaryCard',
+            iconTheme: 'primary',
+            trendText: 'Hệ thống thực',
+            trendClass: 'positive',
+            trendIcon: 'sync'
+        },
+        {
+            label: 'Sắp hết hàng (≤ 5 chiếc)',
+            value: lowStockCount.toLocaleString(),
+            icon: 'running_with_errors',
+            themeClass: lowStockCount > 0 ? 'errorCard' : 'primaryCard',
+            iconTheme: lowStockCount > 0 ? 'error' : 'secondary',
+            trendText: lowStockCount > 0 ? 'Cần nhập hàng' : 'An toàn',
+            trendClass: lowStockCount > 0 ? 'warning' : 'positive',
+            trendIcon: lowStockCount > 0 ? 'warning' : 'check_circle'
+        },
+        {
+            label: 'Danh mục hiện có',
+            value: '4 nhóm',
+            icon: 'avg_pace',
+            themeClass: 'primaryCard',
+            iconTheme: 'secondary',
+            trendText: 'Chu kỳ kiểm kho: 30 ngày',
+            trendClass: 'neutral'
+        }
+    ];
+
+    // --- LOGIC LỌC DỮ LIỆU SẢN PHẨM ---
+    const filteredProducts = products.filter(product => {
+        // 1. Tìm kiếm theo Tên sản phẩm hoặc SKU
+        const firstVariantSku = product.variants?.[0]?.sku || '';
+        const matchesSearch =
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            firstVariantSku.toLowerCase().includes(searchTerm.toLowerCase());
+
+        // 2. Lọc theo tên Danh mục (Khớp tên trả về từ BE như categoryName)
+        const matchesCategory =
+            selectedCategory === 'Tất cả danh mục' ||
+            (product.categoryName && product.categoryName.toLowerCase() === selectedCategory.toLowerCase());
+
+        // 3. Lọc theo tên Thương hiệu (Khớp brandName)
+        const matchesBrand =
+            selectedBrand === 'Tất cả thương hiệu' ||
+            (product.brandName && product.brandName.toLowerCase() === selectedBrand.toLowerCase());
+
+        return matchesSearch && matchesCategory && matchesBrand;
+    });
+
+    // 2. Hàm mở modal
     const openModal = (product = null) => {
         if (product) {
             setEditingProduct(product);
             setFormData({
                 name: product.name,
-                categoryId: '1', // Mặc định ID danh mục phù hợp DB của bạn
-                brandId: '1',    // Mặc định ID thương hiệu phù hợp DB của bạn
+                categoryId: product.categoryId || '1',
+                brandId: product.brandId || '1',
                 sku: product.variants?.[0]?.sku || '',
                 stockQuantity: product.variants?.[0]?.stockQuantity || 0,
                 basePrice: product.basePrice,
@@ -98,13 +131,13 @@ function ProductManagement() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    // 4. Hàm gửi form (Submit) - Đã sửa để xử lý cả Thêm mới & Cập nhật API
+    // 4. Hàm gửi form (Submit)
     const handleFormSubmit = async (e) => {
         e.preventDefault();
 
         const payload = {
             name: formData.name,
-            description: `Mã SKU: ${formData.sku}`, // Tạm lưu kèm SKU vào mô tả nếu bảng Product của bạn chưa có cột SKU độc lập
+            description: `Mã SKU: ${formData.sku}`,
             basePrice: parseFloat(formData.basePrice) || 0,
             imageUrl: formData.imageUrl,
             categoryId: parseInt(formData.categoryId) || 1,
@@ -114,22 +147,20 @@ function ProductManagement() {
 
         try {
             if (editingProduct) {
-                // Gọi API cập nhật sản phẩm
                 await productService.updateProduct(editingProduct.id, payload);
                 alert('Cập nhật thông tin sản phẩm thành công!');
             } else {
-                // Gọi API thêm sản phẩm mới
                 await productService.addProduct(payload);
                 alert('Thêm sản phẩm mới thành công!');
             }
             setIsModalOpen(false);
-            loadProducts(); // Cập nhật lại bảng dữ liệu mới
+            loadProducts();
         } catch (error) {
             alert('Có lỗi xảy ra: ' + error.message);
         }
     };
 
-    // 5. Hàm xử lý Xóa sản phẩm qua API khi click nút Thùng rác
+    // 5. Hàm xử lý Xóa sản phẩm
     const handleDeleteProduct = async (id, name) => {
         if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}" không?`)) {
             try {
@@ -142,7 +173,6 @@ function ProductManagement() {
         }
     };
 
-    // Hàm format định dạng hiển thị tiền tệ VND
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
     };
@@ -151,20 +181,19 @@ function ProductManagement() {
         <main className={styles.main}>
             <div className={styles.container}>
 
-                {/* Page Header Section - GIỮ NGUYÊN GIAO DIỆN */}
+                {/* Page Header Section */}
                 <div className={styles.headerSection}>
                     <div>
                         <h2 className={styles.pageTitle}>Quản lý sản phẩm</h2>
                         <p className={styles.pageSubtitle}>Danh sách tất cả giày và phụ kiện hiện có trong hệ thống.</p>
                     </div>
-                    {/* SỬA: Gắn sự kiện openModal(null) để kích hoạt chế độ thêm mới */}
                     <button className={styles.addBtn} onClick={() => openModal(null)}>
                         <span className="material-symbols-outlined">add</span>
                         Thêm sản phẩm mới
                     </button>
                 </div>
 
-                {/* Contextual Stats Cards (Bento Style) - GIỮ NGUYÊN 100% */}
+                {/* Contextual Stats Cards (Bento Style) - Sử dụng data thật */}
                 <div className={styles.statsGrid}>
                     {statsBentoData.map((card, idx) => (
                         <div key={idx} className={`${styles.statCard} ${styles[card.themeClass]}`}>
@@ -183,44 +212,59 @@ function ProductManagement() {
                     ))}
                 </div>
 
-                {/* Filters Section - GIỮ NGUYÊN 100% */}
+                {/* Filters Section - Đã gắn State điều khiển */}
                 <div className={styles.filtersBar}>
+                    {/* Thanh tìm kiếm nhanh mới bổ sung */}
+                    <div className={styles.searchWrapper} style={{ display: 'flex', alignItems: 'center', backgroundColor: '#fff', padding: '0 10px', borderRadius: '8px', border: '1px solid #e0e0e0', marginRight: '12px', flex: 1 }}>
+                        <span className="material-symbols-outlined" style={{ color: '#757575', marginRight: '6px' }}>search</span>
+                        <input
+                            type="text"
+                            placeholder="Tìm kiếm theo tên, mã SKU..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{ border: 'none', outline: 'none', padding: '8px 0', width: '100%', fontSize: '14px' }}
+                        />
+                    </div>
+
                     <div className={styles.selectWrapper}>
                         <span className={`${styles.filterIcon} material-symbols-outlined`}>category</span>
-                        <select className={styles.selectInput} defaultValue="Tất cả danh mục">
-                            <option>Tất cả danh mục</option>
-                            <option>Sneakers</option>
-                            <option>Running</option>
-                            <option>Basketball</option>
-                            <option>Casual</option>
+                        <select
+                            className={styles.selectInput}
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                        >
+                            <option value="Tất cả danh mục">Tất cả danh mục</option>
+                            <option value="Sneakers">Sneakers</option>
+                            <option value="Running">Running</option>
+                            <option value="Basketball">Basketball</option>
+                            <option value="Casual">Casual</option>
                         </select>
                     </div>
 
                     <div className={styles.selectWrapper}>
                         <span className={`${styles.filterIcon} material-symbols-outlined`}>brand_family</span>
-                        <select className={styles.selectInput} defaultValue="Tất cả thương hiệu">
-                            <option>Tất cả thương hiệu</option>
-                            <option>Nike</option>
-                            <option>Adidas</option>
-                            <option>Jordan</option>
-                            <option>Yeezy</option>
+                        <select
+                            className={styles.selectInput}
+                            value={selectedBrand}
+                            onChange={(e) => setSelectedBrand(e.target.value)}
+                        >
+                            <option value="Tất cả thương hiệu">Tất cả thương hiệu</option>
+                            <option value="Nike">Nike</option>
+                            <option value="Adidas">Adidas</option>
+                            <option value="Jordan">Jordan</option>
+                            <option value="Yeezy">Yeezy</option>
                         </select>
                     </div>
 
                     <div className={styles.divider}></div>
 
-                    <div className={styles.sortGroup}>
-                        <span className={styles.sortLabel}>Sắp xếp:</span>
-                        <button className={styles.sortBtn}>Mới nhất</button>
-                    </div>
-
-                    <button className={styles.advancedFilterBtn}>
-                        <span className="material-symbols-outlined">filter_list</span>
-                        Lọc nâng cao
+                    <button className={styles.advancedFilterBtn} onClick={loadProducts} title="Làm mới danh sách">
+                        <span className="material-symbols-outlined">refresh</span>
+                        Làm mới
                     </button>
                 </div>
 
-                {/* Product Table Area - ĐỔ DỮ LIỆU THẬT VÀO ĐÂY */}
+                {/* Product Table Area */}
                 <div className={styles.tableCard}>
                     <div className={styles.tableWrapper}>
                         <table className={styles.table}>
@@ -238,11 +282,11 @@ function ProductManagement() {
                             <tbody className={styles.tbody}>
                             {isLoading ? (
                                 <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>Đang tải dữ liệu từ server...</td></tr>
-                            ) : products.length === 0 ? (
-                                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>Không có sản phẩm nào trong cơ sở dữ liệu.</td></tr>
+                            ) : filteredProducts.length === 0 ? (
+                                <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>Không có sản phẩm nào phù hợp với bộ lọc tìm kiếm.</td></tr>
                             ) : (
-                                products.map((product) => {
-                                    // Trích xuất an toàn số lượng và SKU từ phần tử biến thể đầu tiên (nếu có)
+                                // Render dựa trên danh sách filteredProducts sau lọc
+                                filteredProducts.map((product) => {
                                     const firstVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
                                     const totalStock = product.variants ? product.variants.reduce((sum, v) => sum + (v.stockQuantity || 0), 0) : 0;
                                     const skuDisplay = firstVariant?.sku || `PROD-${product.id}`;
@@ -287,11 +331,9 @@ function ProductManagement() {
                                                     <button className={styles.actionBtn} title="Cập nhật kho">
                                                         <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>inventory</span>
                                                     </button>
-                                                    {/* SỬA: Thêm sự kiện onClick để mở modal sửa */}
                                                     <button className={styles.actionBtn} title="Chỉnh sửa" onClick={() => openModal(product)}>
                                                         <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
                                                     </button>
-                                                    {/* SỬA: Thêm sự kiện onClick để gọi hàm xóa */}
                                                     <button className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Xóa" onClick={() => handleDeleteProduct(product.id, product.name)}>
                                                         <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
                                                     </button>
@@ -305,20 +347,16 @@ function ProductManagement() {
                         </table>
                     </div>
 
-                    {/* Pagination Footer - GIỮ NGUYÊN 100% */}
+                    {/* Pagination Footer */}
                     <div className={styles.pagination}>
                         <p className={styles.pageText}>
-                            Hiển thị <span>1 - {products.length}</span> trong số <span>{products.length}</span> sản phẩm
+                            Hiển thị <span>1 - {filteredProducts.length}</span> trong số <span>{filteredProducts.length}</span> sản phẩm phù hợp
                         </p>
                         <div className={styles.pageControls}>
                             <button className={styles.pageBtn} disabled>
                                 <span className="material-symbols-outlined">chevron_left</span>
                             </button>
                             <button className={`${styles.pageBtn} ${styles.active}`}>1</button>
-                            <button className={styles.pageBtn}>2</button>
-                            <button className={styles.pageBtn}>3</button>
-                            <span className={styles.ellipsis}>...</span>
-                            <button className={styles.pageBtn}>25</button>
                             <button className={styles.pageBtn}>
                                 <span className="material-symbols-outlined">chevron_right</span>
                             </button>
@@ -328,12 +366,10 @@ function ProductManagement() {
 
             </div>
 
-            {/* POPUP MODAL SECTION - GIỮ NGUYÊN CẤU TRÚC VÀ THÊM VALUE + ONCHANGE ĐỂ LƯU DATA */}
+            {/* POPUP MODAL SECTION */}
             {isModalOpen && (
                 <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-
-                        {/* Modal Header */}
                         <div className={styles.modalHeader}>
                             <h3 className={styles.modalTitle}>
                                 {editingProduct ? `Chỉnh sửa sản phẩm #${editingProduct.id}` : 'Thêm sản phẩm mới'}
@@ -343,7 +379,6 @@ function ProductManagement() {
                             </button>
                         </div>
 
-                        {/* Modal Form Content */}
                         <form onSubmit={handleFormSubmit}>
                             <div className={styles.modalBody}>
                                 <div className={styles.formGroup}>
@@ -396,17 +431,11 @@ function ProductManagement() {
                                 </div>
                             </div>
 
-                            {/* Modal Footer Actions */}
                             <div className={styles.modalFooter}>
-                                <button type="button" className={styles.cancelBtn} onClick={() => setIsModalOpen(false)}>
-                                    Hủy bỏ
-                                </button>
-                                <button type="submit" className={styles.submitBtn}>
-                                    Xác nhận lưu
-                                </button>
+                                <button type="button" className={styles.cancelBtn} onClick={() => setIsModalOpen(false)}>Hủy bỏ</button>
+                                <button type="submit" className={styles.submitBtn}>Xác nhận lưu</button>
                             </div>
                         </form>
-
                     </div>
                 </div>
             )}
