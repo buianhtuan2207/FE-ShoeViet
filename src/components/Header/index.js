@@ -1,37 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import brandService from '../../services/BrandService';
+import categoryService from '../../services/CategoryService';
 
 function Header() {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
 
-    // Kiểm tra trạng thái đăng nhập khi Component được tải
+    // Khai báo thêm State để lưu dữ liệu Menu từ API
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+
+    // 1. EFFECT 1: Lấy danh sách Categories và Brands từ API (Chỉ chạy 1 lần khi load trang)
     useEffect(() => {
-        // Tạo một hàm riêng để check localStorage
+        const fetchMenuData = async () => {
+            try {
+                const [categoriesData, brandsData] = await Promise.all([
+                    categoryService.getAllCategories(),
+                    brandService.getAllBrands()
+                ]);
+                setCategories(categoriesData || []);
+                setBrands(brandsData || []);
+            } catch (error) {
+                console.error("Lỗi khi lấy dữ liệu cấu trúc menu công khai:", error);
+            }
+        };
+        fetchMenuData();
+    }, []);
+
+    // 2. EFFECT 2: Kiểm tra trạng thái đăng nhập và hạn Token (Giữ nguyên logic chuẩn của bạn)
+    useEffect(() => {
         const checkUserData = () => {
+            const token = localStorage.getItem('accessToken');
             const userInfo = localStorage.getItem('userInfo');
-            if (userInfo) {
-                setUser(JSON.parse(userInfo));
+
+            if (token && userInfo) {
+                try {
+                    const decoded = jwtDecode(token);
+                    const currentTime = Date.now() / 1000;
+
+                    if (decoded.exp < currentTime) {
+                        console.warn("Token ở Header đã hết hạn! Tự động xóa trạng thái đăng nhập...");
+                        localStorage.removeItem('accessToken');
+                        localStorage.removeItem('userInfo');
+                        setUser(null);
+                    } else {
+                        setUser(JSON.parse(userInfo));
+                    }
+                } catch (error) {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('userInfo');
+                    setUser(null);
+                }
             } else {
-                setUser(null); // Đảm bảo clear state nếu không có data
+                setUser(null);
             }
         };
 
-        // 1. Chạy lần đầu tiên khi web load
         checkUserData();
-
-        // 2. Lắng nghe "pháo hiệu" từ trang Login (hoặc bất kỳ đâu)
         window.addEventListener('authChange', checkUserData);
-
-        // 3. Dọn dẹp listener khi Component bị hủy (Best practice)
         return () => {
             window.removeEventListener('authChange', checkUserData);
         };
     }, []);
 
-    // Hàm tách lấy chữ cái đầu của từ ĐẦU TIÊN và từ CUỐI CÙNG
-    // Ví dụ: "Nguyễn Văn A" -> "NA", "Trần Anh" -> "TA", "John" -> "J"
     const getInitials = (name) => {
         if (!name) return '';
         const words = name.trim().split(/\s+/);
@@ -39,11 +73,11 @@ function Header() {
         return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
     };
 
-    // Hàm xử lý Đăng xuất
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('userInfo');
-        setUser(null); // Xóa state user để lập tức chuyển về icon Login
+        setUser(null);
+        window.dispatchEvent(new Event('authChange'));
         navigate('/login');
     };
 
@@ -56,12 +90,51 @@ function Header() {
                     SHOEVIET
                 </Link>
 
-                {/* 2. Menu Links */}
+                {/* 2. Menu Links (Đã sửa đổi thành cấu trúc Dropdown đa cột) */}
                 <div className="header-links">
-                    <Link className="nav-link" to="/products?category=men">Men</Link>
-                    <Link className="nav-link" to="/products?category=women">Women</Link>
-                    <Link className="nav-link" to="/products?category=kid">Kid</Link>
-                    <Link className="nav-link" to="/products?category=promotion">Promotion</Link>
+                    <Link className="nav-link" to="/">Trang chủ</Link>
+
+                    {/* KHỐI DROPDOWN SẢN PHẨM MỚI */}
+                    <div className="nav-item-dropdown">
+                        <span className="nav-link dynamic-toggle">
+                            Sản phẩm
+                            <span className="material-symbols-outlined dropdown-arrow">expand_more</span>
+                        </span>
+
+                        {/* Khung chứa các cột phân loại */}
+                        <div className="mega-menu">
+                            {/* Cột 1: Danh mục lấy từ API */}
+                            <div className="mega-column">
+                                <h4 className="mega-title">Danh mục</h4>
+                                {categories.slice(0, 6).map((cat) => (
+                                    <Link key={cat.id} to={`/products?category=${cat.id}`} className="mega-item">
+                                        {cat.name}
+                                    </Link>
+                                ))}
+                            </div>
+
+                            {/* Cột 2: Thương hiệu lấy từ API */}
+                            <div className="mega-column">
+                                <h4 className="mega-title">Thương hiệu</h4>
+                                {brands.slice(0, 6).map((brand) => (
+                                    <Link key={brand.id} to={`/products?brand=${brand.id}`} className="mega-item">
+                                        {brand.name}
+                                    </Link>
+                                ))}
+                            </div>
+
+                            {/* Cột 3: Bộ sưu tập & Ưu đãi */}
+                            <div className="mega-column">
+                                <h4 className="mega-title">Xu hướng</h4>
+                                <Link to="/products?sort=Newest" className="mega-item highlight-new">
+                                    <span className="badge-dot new"></span> Hàng mới về
+                                </Link>
+                                <Link to="/products?category=promotion" className="mega-item highlight-promo">
+                                    <span className="badge-dot promo"></span> Khuyến mãi hot
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* 3. Thanh tìm kiếm */}
@@ -74,7 +147,7 @@ function Header() {
                     />
                 </div>
 
-                {/* 4. Các nút Icon (Nằm bên phải) */}
+                {/* 4. Các nút Icon */}
                 <div className="header-icons">
                     <Link to="/cart" className="action-button">
                         <span className="material-symbols-outlined">shopping_cart</span>
@@ -93,19 +166,16 @@ function Header() {
                             </div>
 
                             <div className="dropdown-menu">
-                                {/* Chỉ hiển thị nếu user có role là admin */}
                                 {user.role === 'admin' && (
                                     <Link to="/admin" className="dropdown-item" style={{ color: '#2563eb' }}>
                                         <span className="material-symbols-outlined" style={{ color: '#2563eb' }}>dashboard</span>
                                         Trang quản trị Admin
                                     </Link>
                                 )}
-
                                 <Link to="/person" className="dropdown-item">
                                     <span className="material-symbols-outlined">account_circle</span>
                                     Thông tin tài khoản
                                 </Link>
-
                                 <button onClick={handleLogout} className="dropdown-item logout-btn">
                                     <span className="material-symbols-outlined">logout</span>
                                     Đăng xuất
@@ -113,7 +183,6 @@ function Header() {
                             </div>
                         </div>
                     ) : (
-                        // Khi chưa đăng nhập: Chỉ hiển thị duy nhất 1 icon này để dẫn sang trang Login
                         <Link to="/login" className="action-button">
                             <span className="material-symbols-outlined">person</span>
                         </Link>

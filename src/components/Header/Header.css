@@ -280,3 +280,110 @@
         padding-top: 5rem;
     }
 }
+/* Container bọc nút Sản phẩm */
+.nav-item-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dynamic-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.dropdown-arrow {
+    font-size: 18px !important;
+    transition: transform 0.2s ease;
+}
+
+/* Hiệu ứng xoay mũi tên khi hover vào mục Sản phẩm */
+.nav-item-dropdown:hover .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+/* Khung cấu trúc Mega Menu thả xuống */
+.mega-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background-color: #ffffff;
+    min-width: 450px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Chia đều làm 3 cột */
+    gap: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s ease;
+    z-index: 999;
+}
+
+/* Hiển thị menu khi di chuột vào */
+.nav-item-dropdown:hover .mega-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Từng cột bên trong menu */
+.mega-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mega-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+/* Các đường link con */
+.mega-item {
+    font-size: 13.5px;
+    color: #555555;
+    text-decoration: none;
+    transition: color 0.2s ease, padding-left 0.2s ease;
+}
+
+.mega-item:hover {
+    color: #000000;
+    padding-left: 4px; /* Tạo hiệu ứng dịch nhẹ sang phải khi hover */
+}
+
+/* Điểm nhấn cho hàng mới và khuyến mãi */
+.highlight-new {
+    font-weight: 500;
+    color: #2563eb !important; /* Xanh dương */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.highlight-promo {
+    font-weight: 500;
+    color: #dc2626 !important; /* Đỏ đô */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Các chấm màu thông báo */
+.badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.badge-dot.new { background-color: #2563eb; }
+.badge-dot.promo { background-color: #dc2626; }

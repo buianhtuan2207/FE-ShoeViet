@@ -1,70 +1,102 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../../components/ProductCard';
+import brandService from '../../services/BrandService';
+import categoryService from '../../services/CategoryService';
+import productService from '../../services/ProductSercive';
 import './Home.css';
-
-const BRANDS = ['NIKE', 'ADIDAS', 'NEW BALANCE', 'ASICS', 'SALOMON'];
-
-const CATEGORIES = [
-    {
-        id: 1,
-        title: 'Chạy Bộ',
-        subtitle: 'Kỹ thuật chuẩn xác kết hợp thẩm mỹ đường phố.',
-        img: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614c3a?q=80&w=800&auto=format&fit=crop',
-        isLarge: true,
-    },
-    {
-        id: 2,
-        title: 'Thời Trang',
-        img: 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=800&auto=format&fit=crop',
-        isLarge: false,
-    },
-    {
-        id: 3,
-        title: 'Bóng Rổ',
-        img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&auto=format&fit=crop',
-        isLarge: false,
-    },
-];
-
-const LATEST_PRODUCTS = [
-    { id: 1, category: 'Chạy Bộ', name: 'Velocity Pro', price: '$150', img: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=600&auto=format&fit=crop' },
-    { id: 2, category: 'Thời Trang', name: 'City Drift', price: '$135', img: 'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=600&auto=format&fit=crop' },
-    { id: 3, category: 'Tập Luyện', name: 'Nova Flex', price: '$145', img: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?q=80&w=600&auto=format&fit=crop' },
-    { id: 4, category: 'Thời Trang', name: 'Element Retro', price: '$120', img: 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=600&auto=format&fit=crop' },
-];
 
 const TECH_FEATURES = [
     { icon: 'speed', title: 'Thân Giày Aero-Mesh', desc: 'Thoáng khí tối đa mà vẫn giữ được sự hỗ trợ ôm sát chân hoàn hảo.' },
     { icon: 'water_drop', title: 'Lõi Hydro-Shield', desc: 'Lớp chống chịu thời tiết giúp bạn thoải mái di chuyển trong mọi điều kiện.' },
 ];
 
+// Component con hiển thị Danh mục
 const CategoryCard = ({ data }) => {
-    const { title, subtitle, img, isLarge } = data;
+    // Đọc các trường dữ liệu thực tế từ DB (name, description thay vì title, subtitle)
+    const { id, name, description, isLarge } = data;
+
+    // Gán ảnh mặc định nếu trong DB chưa có cột lưu link ảnh
+    const fallbackImg = isLarge
+        ? 'https://images.unsplash.com/photo-1595950653106-6c9ebd614c3a?q=80&w=800&auto=format&fit=crop'
+        : 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=800&auto=format&fit=crop';
+
+    // Giả sử sau này DB bạn có trường imageUrl, ta có thể dùng: const img = data.imageUrl || fallbackImg;
+    const img = fallbackImg;
+
     return (
-        <div className={`category-card ${isLarge ? 'category-card-large' : ''}`}>
-            <img src={img} alt={title} className="category-img" />
+        <Link to={`/products?category=${id}`} className={`category-card ${isLarge ? 'category-card-large' : ''}`}>
+            <img src={img} alt={name} className="category-img" />
             <div className="category-overlay">
                 {isLarge ? (
                     <>
-                        <h3 className="category-title-large">{title}</h3>
-                        <p className="category-subtitle">{subtitle}</p>
+                        <h3 className="category-title-large">{name}</h3>
+                        <p className="category-subtitle">{description}</p>
                     </>
                 ) : (
-                    <h3 className="category-title-small">{title}</h3>
+                    <h3 className="category-title-small">{name}</h3>
                 )}
             </div>
-        </div>
+        </Link>
     );
 };
 
 function Home() {
+    // 1. Khởi tạo State để lưu trữ dữ liệu từ API
+    const [brands, setBrands] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [latestProducts, setLatestProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // 2. Gọi API ngay khi Component vừa được mount lên giao diện
+    useEffect(() => {
+        const fetchHomeData = async () => {
+            try {
+                setLoading(true);
+
+                // Gọi song song cả 3 API cùng lúc để tối ưu tốc độ load
+                const [brandsData, categoriesData, productsData] = await Promise.all([
+                    brandService.getAllBrands(),
+                    categoryService.getAllCategories(),
+                    productService.getAllProducts()
+                ]);
+
+                setBrands(brandsData);
+
+                // Xử lý Categories: Chỉ lấy 3 danh mục đầu tiên và đánh dấu cái đầu tiên là "isLarge"
+                if (categoriesData && categoriesData.length > 0) {
+                    const formattedCategories = categoriesData.slice(0, 3).map((cat, index) => ({
+                        ...cat,
+                        isLarge: index === 0
+                    }));
+                    setCategories(formattedCategories);
+                }
+
+                // Xử lý Products: Lấy 4 sản phẩm mới nhất
+                if (productsData && productsData.length > 0) {
+                    setLatestProducts(productsData.slice(0, 4));
+                }
+
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu trang chủ:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchHomeData();
+    }, []);
+
+    // Hiển thị màn hình chờ trong lúc đợi API trả kết quả
+    if (loading) {
+        return <div style={{ textAlign: 'center', padding: '100px', fontSize: '20px' }}>Đang tải dữ liệu trang chủ...</div>;
+    }
+
     return (
         <div className="home-wrapper">
             {/* HERO SECTION */}
             <section className="hero-section">
                 <div className="hero-bg-layer">
-                    {/* Ảnh nền banner Hero */}
                     <img alt="Hero background" src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=2000&auto=format&fit=crop" className="hero-bg-img" />
                     <div className="hero-bg-gradient"></div>
                 </div>
@@ -77,46 +109,50 @@ function Home() {
                         Khám phá đỉnh cao của thẩm mỹ thành thị. Bộ sưu tập Apex V2 mới đã ra mắt, định nghĩa lại mọi giới hạn trên đường phố.
                     </p>
                     <div className="hero-actions">
-                        <button className="btn-primary">
+                        <Link to="/products" className="btn-primary" style={{ display: 'inline-flex', textDecoration: 'none' }}>
                             <span className="btn-text">Mua ngay</span>
                             <div className="btn-primary-hover"></div>
-                        </button>
-                        <button className="btn-secondary">
+                        </Link>
+                        <Link to="/categories" className="btn-secondary" style={{ display: 'inline-flex', textDecoration: 'none' }}>
                             <span className="btn-text">Khám phá</span>
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </section>
 
-            {/* BRANDS SECTION */}
-            <section className="brands-section">
-                <div className="container center-text">
-                    <h2 className="section-subtitle">Được Tin Dùng Bởi Các Biểu Tượng Toàn Cầu</h2>
-                    <div className="brands-list">
-                        {BRANDS.map((brand, index) => (
-                            <span key={index} className="brand-item">{brand}</span>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* CATEGORIES SECTION */}
-            <section className="categories-section">
-                <div className="container">
-                    <div className="section-header">
-                        <div>
-                            <h2 className="section-title">Danh Mục Giày</h2>
-                            <p className="section-desc">Khám phá các bộ sưu tập giày chuyên dụng của chúng tôi.</p>
+            {/* BRANDS SECTION - Dữ liệu thực từ API */}
+            {brands.length > 0 && (
+                <section className="brands-section">
+                    <div className="container center-text">
+                        <h2 className="section-subtitle">Được Tin Dùng Bởi Các Biểu Tượng Toàn Cầu</h2>
+                        <div className="brands-list">
+                            {brands.map((brand) => (
+                                <span key={brand.id} className="brand-item">{brand.name.toUpperCase()}</span>
+                            ))}
                         </div>
-                        <Link to="/categories" className="view-all-link">Xem Tất Cả</Link>
                     </div>
-                    <div className="categories-grid">
-                        {CATEGORIES.map(category => (
-                            <CategoryCard key={category.id} data={category} />
-                        ))}
+                </section>
+            )}
+
+            {/* CATEGORIES SECTION - Dữ liệu thực từ API */}
+            {categories.length > 0 && (
+                <section className="categories-section">
+                    <div className="container">
+                        <div className="section-header">
+                            <div>
+                                <h2 className="section-title">Danh Mục Giày</h2>
+                                <p className="section-desc">Khám phá các bộ sưu tập giày chuyên dụng của chúng tôi.</p>
+                            </div>
+                            <Link to="/products" className="view-all-link">Xem Tất Cả</Link>
+                        </div>
+                        <div className="categories-grid">
+                            {categories.map(category => (
+                                <CategoryCard key={category.id} data={category} />
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
             {/* LATEST PRODUCTS SECTION */}
             <section className="products-section">
@@ -126,13 +162,19 @@ function Home() {
                             <h2 className="section-title">Sản phẩm mới nhất</h2>
                             <p className="section-desc">Tuyển chọn kỹ lưỡng những mẫu giày mới nhất từ chúng tôi.</p>
                         </div>
-                        <Link to="/products" className="view-all-link">Xem Tất Cả</Link>
+                        <Link to="/product" className="view-all-link">Xem Tất Cả</Link>
                     </div>
-                    <div className="products-grid">
-                        {LATEST_PRODUCTS.map(product => (
-                            <ProductCard key={product.id} data={product} />
-                        ))}
-                    </div>
+
+                    {latestProducts.length > 0 ? (
+                        <div className="products-grid">
+                            {/* CODE MỚI RẤT GỌN Ở ĐÂY */}
+                            {latestProducts.map(product => (
+                                <ProductCard key={product.id} data={product} />
+                            ))}
+                        </div>
+                    ) : (
+                        <p style={{ textAlign: 'center', marginTop: '20px' }}>Chưa có sản phẩm nào được hiển thị.</p>
+                    )}
                 </div>
             </section>
 
@@ -163,7 +205,6 @@ function Home() {
                         </div>
                         <div className="tech-visual">
                             <div className="tech-visual-bg"></div>
-                            {/* Ảnh Zoom cận cảnh chất liệu giày */}
                             <img alt="Công nghệ giày" src="https://images.unsplash.com/photo-1618354691438-25bc04584c23?q=80&w=1000&auto=format&fit=crop" className="tech-img" />
                         </div>
                     </div>
