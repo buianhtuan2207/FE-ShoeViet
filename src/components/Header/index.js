@@ -194,21 +194,21 @@ function Header() {
 
                         {/* Khung chứa các cột phân loại */}
                         <div className="mega-menu">
-                            {/* Cột 1: Danh mục lấy từ API */}
+                            {/* Cột 1: Danh mục - Đổi thành /product */}
                             <div className="mega-column">
                                 <h4 className="mega-title">Danh mục</h4>
                                 {categories.slice(0, 6).map((cat) => (
-                                    <Link key={cat.id} to={`/products?category=${cat.id}`} className="mega-item">
+                                    <Link key={cat.id} to={`/product?categoryId=${cat.id}`} className="mega-item">
                                         {cat.name}
                                     </Link>
                                 ))}
                             </div>
 
-                            {/* Cột 2: Thương hiệu lấy từ API */}
+                            {/* Cột 2: Thương hiệu - Đổi thành /product */}
                             <div className="mega-column">
                                 <h4 className="mega-title">Thương hiệu</h4>
                                 {brands.slice(0, 6).map((brand) => (
-                                    <Link key={brand.id} to={`/products?brand=${brand.id}`} className="mega-item">
+                                    <Link key={brand.id} to={`/product?brandId=${brand.id}`} className="mega-item">
                                         {brand.name}
                                     </Link>
                                 ))}
@@ -217,10 +217,11 @@ function Header() {
                             {/* Cột 3: Bộ sưu tập & Ưu đãi */}
                             <div className="mega-column">
                                 <h4 className="mega-title">Xu hướng</h4>
-                                <Link to="/products?sort=Newest" className="mega-item highlight-new">
+                                {/* ĐÃ SỬA: Đổi từ /products?sort=Newest thành /product?sortBy=Newest */}
+                                <Link to="/product?sortBy=Newest" className="mega-item highlight-new">
                                     <span className="badge-dot new"></span> Hàng mới về
                                 </Link>
-                                <Link to="/products?category=promotion" className="mega-item highlight-promo">
+                                <Link to="/product?category=promotion" className="mega-item highlight-promo">
                                     <span className="badge-dot promo"></span> Khuyến mãi hot
                                 </Link>
                             </div>
