@@ -208,7 +208,7 @@ function Person() {
 
                 {/* Quick Links */}
                 <div className={styles.quickLinks}>
-                    <Link to="/orders" className={styles.quickLinkCard}>
+                    <Link to="/history" className={styles.quickLinkCard}>
                         <div className={styles.linkIcon}>📦</div>
                         <h3>Đơn hàng của tôi</h3>
                         <p>Xem lịch sử và trạng thái đơn hàng</p>

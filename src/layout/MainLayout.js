@@ -7,7 +7,7 @@ function MainLayout() {
     return (
         <>
             <Header />
-            <main className="pt-20">
+            <main style={{ paddingTop: '6rem' }}>
                 <Outlet />
             </main>
             <Footer />

@@ -4,6 +4,7 @@ import MainLayout from '../layout/MainLayout';
 import Home from "../pages/Home";
 import Product from "../pages/Product";
 import ProductDetail from "../pages/ProductDetail";
+import SearchResults from "../pages/SearchResults";
 import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 import Register from "../pages/Register";
@@ -45,19 +46,22 @@ function AppRoutes() {
 
                 <Route path="/" element={<Home />} />
                 <Route path="/product" element={<Product />} />
+                <Route path="/search" element={<SearchResults />} />
                 <Route path="/detail/:id" element={<ProductDetail />} />
                 <Route path="/cart" element={<Cart />} /> {/* Giỏ hàng cho xem tự do */}
 
                 {/* --- NHÓM PROTECTED ROUTES (CUSTOMER): Bắt buộc đăng nhập quyền Customer mới được Checkout --- */}
                 <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
                     <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/my-profile" element={<Person />} />
+                    <Route path="/history" element={<History />} />
                     {/* Nếu sau này bạn có thêm trang /profile, /order-history... thì ném vào đây luôn */}
                 </Route>
 
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
-                <Route path="/person" element={<Person />} />
-                <Route path="/history" element={<History />} />
+                
+                
             </Route>
 
             {/* 3. Xử lý khi người dùng nhập sai URL (Redirect về Home) */}
