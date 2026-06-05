@@ -272,12 +272,12 @@
 }
 /* Prevent fixed header from overlapping page content */
 .header-nav + main {
-    padding-top: 5rem; /* matches .header-container height */
+    padding-top: 6rem; /* ensure content stays below the fixed header */
 }
 
 @media (max-width: 640px) {
     .header-nav + main {
-        padding-top: 5rem;
+        padding-top: 6rem;
     }
 }
 /* Container bọc nút Sản phẩm */
@@ -387,3 +387,110 @@
 }
 .badge-dot.new { background-color: #2563eb; }
 .badge-dot.promo { background-color: #dc2626; }
+
+/* SEARCH FUNCTIONALITY STYLES */
+.search-form {
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Search Suggestions Dropdown */
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e5e7eb;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.suggestion-section {
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.suggestion-section:last-child {
+    border-bottom: none;
+}
+
+.suggestion-label {
+    display: block;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    color: #374151;
+    text-decoration: none;
+}
+
+.suggestion-item:hover {
+    background-color: #f9fafb;
+    color: #111827;
+}
+
+.suggestion-item .material-symbols-outlined {
+    font-size: 18px;
+    color: #d1d5db;
+    flex-shrink: 0;
+}
+
+.suggestion-text {
+    flex: 1;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.no-suggestions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px 16px;
+    color: #9ca3af;
+    text-align: center;
+    font-size: 13px;
+}
+
+.no-suggestions .material-symbols-outlined {
+    font-size: 24px;
+    color: #e5e7eb;
+}
+
+/* Scrollbar styling */
+.search-suggestions::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-suggestions::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+}
+
+.search-suggestions::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+.search-suggestions::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}

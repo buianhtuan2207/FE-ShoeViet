@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import brandService from '../../services/BrandService';
 import categoryService from '../../services/CategoryService';
+import searchService from '../../services/SearchService';
 
 function Header() {
     const navigate = useNavigate();
@@ -13,7 +14,15 @@ function Header() {
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
 
-    // 1. EFFECT 1: Lấy danh sách Categories và Brands từ API (Chỉ chạy 1 lần khi load trang)
+    // State cho tìm kiếm
+    const [searchInput, setSearchInput] = useState('');
+    const [searchSuggestions, setSearchSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [searchHistory, setSearchHistory] = useState([]);
+    const searchInputRef = useRef(null);
+    const suggestionsRef = useRef(null);
+
+    //EFFECT 1: Lấy danh sách Categories và Brands từ API (Chỉ chạy 1 lần khi load trang)
     useEffect(() => {
         const fetchMenuData = async () => {
             try {
@@ -66,6 +75,88 @@ function Header() {
         };
     }, []);
 
+    //Load lịch tìm kiếm từ localStorage
+    useEffect(() => {
+        const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+        setSearchHistory(history.slice(0, 5));
+    }, []);
+
+    
+    useEffect(() => {
+        const debounceTimer = setTimeout(async () => {
+            if (searchInput.trim().length >= 2) {
+                try {
+                    const suggestions = await searchService.getSearchSuggestions(searchInput);
+                    setSearchSuggestions(suggestions);
+                    setShowSuggestions(true);
+                } catch (error) {
+                    console.error('Lỗi khi lấy gợi ý tìm kiếm:', error);
+                }
+            } else {
+                setSearchSuggestions([]);
+                if (searchInput.trim().length === 0 && searchHistory.length > 0) {
+                    setShowSuggestions(true);
+                } else {
+                    setShowSuggestions(false);
+                }
+            }
+        }, 300);
+
+        return () => clearTimeout(debounceTimer);
+    }, [searchInput, searchHistory]);
+
+    // Xử lý click outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                suggestionsRef.current &&
+                !suggestionsRef.current.contains(event.target) &&
+                searchInputRef.current &&
+                !searchInputRef.current.contains(event.target)
+            ) {
+                setShowSuggestions(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+
+    const handleSearchChange = (e) => {
+        setSearchInput(e.target.value);
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (searchInput.trim()) {
+            // Lưu vào lịch tìm kiếm
+            const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            const newHistory = [searchInput, ...history.filter(item => item !== searchInput)].slice(0, 10);
+            localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+
+            // Điều hướng đến trang tìm kiếm
+            navigate(`/search?q=${encodeURIComponent(searchInput)}`);
+            setSearchInput('');
+            setShowSuggestions(false);
+        }
+    };
+
+    const handleSuggestionClick = (suggestion) => {
+        if (suggestion.type === 'product') {
+            navigate(`/detail/${suggestion.id}`);
+        } else {
+            setSearchInput(suggestion.name);
+            setShowSuggestions(false);
+        }
+    };
+
+    const handleHistoryClick = (historyItem) => {
+        navigate(`/search?q=${encodeURIComponent(historyItem)}`);
+        setSearchInput('');
+        setShowSuggestions(false);
+    };
+
     const getInitials = (name) => {
         if (!name) return '';
         const words = name.trim().split(/\s+/);
@@ -96,10 +187,10 @@ function Header() {
 
                     {/* KHỐI DROPDOWN SẢN PHẨM MỚI */}
                     <div className="nav-item-dropdown">
-                        <span className="nav-link dynamic-toggle">
+                        <Link to="/product" className="nav-link dynamic-toggle">
                             Sản phẩm
                             <span className="material-symbols-outlined dropdown-arrow">expand_more</span>
-                        </span>
+                        </Link>
 
                         {/* Khung chứa các cột phân loại */}
                         <div className="mega-menu">
@@ -139,12 +230,72 @@ function Header() {
 
                 {/* 3. Thanh tìm kiếm */}
                 <div className="search-container">
-                    <span className="material-symbols-outlined search-icon">search</span>
-                    <input
-                        type="text"
-                        className="search-input"
-                        placeholder="Tìm kiếm..."
-                    />
+                    <form onSubmit={handleSearchSubmit} className="search-form">
+                        <span className="material-symbols-outlined search-icon">search</span>
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            className="search-input"
+                            placeholder="Tìm kiếm giày..."
+                            value={searchInput}
+                            onChange={handleSearchChange}
+                            onFocus={() => {
+                                if (searchInput.trim().length === 0 && searchHistory.length > 0) {
+                                    setShowSuggestions(true);
+                                } else if (searchInput.trim().length >= 2) {
+                                    setShowSuggestions(true);
+                                }
+                            }}
+                        />
+                    </form>
+
+                    {/* Dropdown gợi ý tìm kiếm */}
+                    {showSuggestions && (
+                        <div ref={suggestionsRef} className="search-suggestions">
+                            {searchInput.trim().length > 0 && searchSuggestions.length > 0 && (
+                                <>
+                                    <div className="suggestion-section">
+                                        <span className="suggestion-label">Sản phẩm</span>
+                                        {searchSuggestions.map((suggestion) => (
+                                            <div
+                                                key={suggestion.id}
+                                                className="suggestion-item"
+                                                onClick={() => handleSuggestionClick(suggestion)}
+                                            >
+                                                <span className="material-symbols-outlined">search</span>
+                                                <span className="suggestion-text">{suggestion.name}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            )}
+
+                            {searchInput.trim().length === 0 && searchHistory.length > 0 && (
+                                <div className="suggestion-section">
+                                    <span className="suggestion-label">Lịch sử tìm kiếm</span>
+                                    {searchHistory.map((item, index) => (
+                                        <div
+                                            key={index}
+                                            className="suggestion-item"
+                                            onClick={() => handleHistoryClick(item)}
+                                        >
+                                            <span className="material-symbols-outlined">history</span>
+                                            <span className="suggestion-text">{item}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {searchInput.trim().length > 0 && searchSuggestions.length === 0 && (
+                                <div className="suggestion-section">
+                                    <div className="no-suggestions">
+                                        <span className="material-symbols-outlined">search_off</span>
+                                        <span>Không tìm thấy sản phẩm phù hợp</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* 4. Các nút Icon */}
