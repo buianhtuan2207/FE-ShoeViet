@@ -2,7 +2,7 @@ import API from './api';
 import productService from './ProductService';
 
 const searchService = {
-    // Tìm kiếm sản phẩm theo từ khóa, danh mục, thương hiệu, giá
+    
     searchProducts: async (filters = {}) => {
         try {
             // Lấy tất cả sản phẩm 
