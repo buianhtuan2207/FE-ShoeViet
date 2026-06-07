@@ -324,9 +324,13 @@ function Header() {
                                         Trang quản trị Admin
                                     </Link>
                                 )}
-                                <Link to="/person" className="dropdown-item">
+                                <Link to="/my-profile" className="dropdown-item">
                                     <span className="material-symbols-outlined">account_circle</span>
                                     Thông tin tài khoản
+                                </Link>
+                                <Link to="/history" className="dropdown-item">
+                                    <span className="material-symbols-outlined">history</span>
+                                    Lịch sử mua hàng
                                 </Link>
                                 <button onClick={handleLogout} className="dropdown-item logout-btn">
                                     <span className="material-symbols-outlined">logout</span>

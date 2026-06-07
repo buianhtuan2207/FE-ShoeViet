@@ -30,9 +30,10 @@ function AppRoutes() {
             } />
 
             {/* 1. ROUTE CHO ADMIN: Được bảo vệ riêng và KHÔNG dùng MainLayout */}
-            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+            {/* <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
                 <Route path="/admin" element={<Admin />} />
-            </Route>
+            </Route> */}
+            <Route path="/admin" element={<Admin />} />
 
             {/* 2. Nhóm Route dùng MainLayout (Cần Header/Footer/Sidebar) */}
             <Route element={<MainLayout />}>
@@ -60,7 +61,7 @@ function AppRoutes() {
 
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
-                
+                <Route path="/admin" element={<Admin />} />
                 
             </Route>
 

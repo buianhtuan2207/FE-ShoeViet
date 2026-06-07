@@ -206,12 +206,12 @@ function Register() {
                         {/* Terms */}
                         <div className={styles.termsWrapper}>
                             <input
-                                id="terms"
+                                id="agreeTerms"
                                 type="checkbox"
                                 checked={formData.agreeTerms}
                                 onChange={handleInputChange}
                             />
-                            <label htmlFor="terms">
+                            <label htmlFor="agreeTerms">
                                 Tôi đồng ý với <a href="#">Điều khoản & Điều kiện</a> của ShoeViet.
                             </label>
                         </div>
