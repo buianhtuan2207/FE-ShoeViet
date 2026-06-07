@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import './ProductDetail.css';
 import ProductCard from "../../components/ProductCard";
 import productService from '../../services/ProductService';
+import CartService from '../../services/CartService';
 
 function ProductDetail() {
     const { id } = useParams(); // Lấy ID sản phẩm từ URL thanh địa chỉ
@@ -17,6 +18,7 @@ function ProductDetail() {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [selectedColor, setSelectedColor] = useState(''); // Lưu màu khách chọn
     const [selectedSize, setSelectedSize] = useState('');   // Lưu size khách chọn
+    const [cartNotification, setCartNotification] = useState('');
 
     // 1. GỌI API LẤY DỮ LIỆU KHI COMPONENT LOAD
     useEffect(() => {
@@ -92,6 +94,26 @@ function ProductDetail() {
 
     // 4. Tìm kiếm đúng variant được chọn để kiểm tra SKU và số lượng kho (stockQuantity)
     const activeVariant = product.variants?.find(v => v.color === selectedColor && v.size === selectedSize);
+
+    const handleAddToCart = () => {
+        if (!activeVariant || activeVariant.stockQuantity <= 0) return;
+
+        const cartItem = {
+            id: product.id,
+            name: product.name,
+            image: productImages[0],
+            price: activeVariant.price ?? product.basePrice,
+            color: selectedColor,
+            size: selectedSize,
+            quantity: 1,
+            stockQuantity: activeVariant.stockQuantity,
+            sku: activeVariant.sku
+        };
+
+        CartService.addItem(cartItem);
+        setCartNotification('Đã thêm sản phẩm vào giỏ hàng.');
+        setTimeout(() => setCartNotification(''), 2500);
+    };
 
     // --- LOGIC DI CHUYỂN SLIDE ẢNH ---
     const handleNextImage = () => {
@@ -248,10 +270,16 @@ function ProductDetail() {
                                 className="btn-add-to-cart"
                                 disabled={!activeVariant || activeVariant.stockQuantity <= 0}
                                 style={{ opacity: (!activeVariant || activeVariant.stockQuantity <= 0) ? 0.6 : 1 }}
+                                onClick={handleAddToCart}
                             >
                                 <span>{activeVariant?.stockQuantity > 0 ? 'Thêm vào giỏ hàng' : 'Tạm hết hàng'}</span>
                                 <span className="material-symbols-outlined">arrow_forward</span>
                             </button>
+                            {cartNotification && (
+                                <div style={{ marginTop: '14px', color: '#047857', fontWeight: 600 }}>
+                                    {cartNotification}
+                                </div>
+                            )}
                             <div className="shipping-info">
                                 <span className="material-symbols-outlined icon-small">local_shipping</span>
                                 <span>Miễn phí vận chuyển cho đơn hàng trên 1.500.000 ₫</span>
