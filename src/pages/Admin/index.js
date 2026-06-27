@@ -11,6 +11,7 @@ import AccountManagement from "./tabs/AccountManagement";
 import ProductManagement from "./tabs/ProductManagement";
 import CouponManagement from "./tabs/CouponManagement";
 import OrderManagement from "./tabs/OrderManagement";
+import CategoryManagement from "./tabs/CategoryManagement";
 
 function Admin() {
     // Quản lý trạng thái tab đang active (mặc định là 'dashboard')
@@ -25,6 +26,8 @@ function Admin() {
               return <AccountManagement />;
             case 'products':
               return <ProductManagement />;
+            case 'categories':
+                return <CategoryManagement />
             case 'coupons':
                 return <CouponManagement />
             case 'orders':
@@ -40,6 +43,7 @@ function Admin() {
             case 'dashboard': return 'Bảng điều khiển';
             case 'accounts': return 'Quản lý tài khoản';
             case 'products': return 'Quản lý sản phẩm';
+            case 'categories': return 'Quản lý danh mục'
             case 'coupons': return 'Quản lý mã giảm giá';
             case 'orders': return 'Quản lý hóa đơn';
             default: return 'Bảng điều khiển';
