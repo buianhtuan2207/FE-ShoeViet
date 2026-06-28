@@ -45,6 +45,14 @@ const authService = {
         const response = await API.post('/auth/reset-password', payload);
         return response.data;
     },
+
+    // 7. Đăng nhập bằng Google
+    loginWithGoogle: async (idToken) => {
+        const response = await API.post('/auth/google', {
+            idToken: idToken
+        });
+        return response.data;
+    }
 };
 
 export default authService;
