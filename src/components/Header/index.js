@@ -304,9 +304,9 @@ function Header() {
                     <Link to="/cart" className="action-button">
                         <span className="material-symbols-outlined">shopping_cart</span>
                     </Link>
-                    <button className="action-button">
+                    <Link to="/favorite" className="action-button">
                         <span className="material-symbols-outlined">favorite_border</span>
-                    </button>
+                    </Link>
 
                     {user ? (
                         <div className="profile-menu-container">
