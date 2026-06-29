@@ -48,7 +48,7 @@ $transition: all 0.2s ease-in-out;
     overflow: hidden;
     position: sticky;
     top: 88px;
-    height: 52%;
+    height: max-content;
   }
 
   .userInfo {
