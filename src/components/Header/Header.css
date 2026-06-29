@@ -494,3 +494,45 @@
 .search-suggestions::-webkit-scrollbar-thumb:hover {
     background: #9ca3af;
 }
+.favorite-header-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.favorite-header-btn .material-symbols-outlined {
+    transition: color 0.2s ease;
+}
+.favorite-header-btn:has(.favorite-badge) .material-symbols-outlined {
+    color: #ff4757;
+}
+
+.favorite-badge {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    background-color: #ff4757;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(1);
+    }
+}

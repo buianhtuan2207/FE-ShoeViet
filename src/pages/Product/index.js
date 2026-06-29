@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import {useLocation, useSearchParams} from 'react-router-dom';
 import ProductCard from '../../components/ProductCard';
 import productService from '../../services/ProductService';
 import brandService from '../../services/BrandService';
@@ -9,6 +9,7 @@ import './Product.scss';
 function ProductPage() {
     // --- HOOK QUẢN LÝ URL QUERY PARAMETERS ---
     const [searchParams, setSearchParams] = useSearchParams();
+    const location = useLocation();
 
     // --- STATE QUẢN LÝ DỮ LIỆU GỐC TỪ API ---
     const [products, setProducts] = useState([]);
@@ -51,7 +52,7 @@ function ProductPage() {
             }
         };
         initData();
-    }, []);
+    }, [location.key]);
 
     // 2. EFFECT 2: ĐỒNG BỘ URL ĐANG CÓ (?brandId=... hoặc ?categoryId=...) VÀO STATE SIDEBAR
     useEffect(() => {

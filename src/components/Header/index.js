@@ -5,10 +5,12 @@ import { jwtDecode } from 'jwt-decode';
 import brandService from '../../services/BrandService';
 import categoryService from '../../services/CategoryService';
 import searchService from '../../services/SearchService';
+import { useFavorites } from '../../context/FavoriteContext';
 
 function Header() {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
+    const { likedProductIds, clearAllFavorites } = useFavorites();
 
     // Khai báo thêm State để lưu dữ liệu Menu từ API
     const [categories, setCategories] = useState([]);
@@ -167,6 +169,7 @@ function Header() {
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('userInfo');
+        clearAllFavorites();
         setUser(null);
         window.dispatchEvent(new Event('authChange'));
         navigate('/login');
@@ -304,8 +307,13 @@ function Header() {
                     <Link to="/cart" className="action-button">
                         <span className="material-symbols-outlined">shopping_cart</span>
                     </Link>
-                    <Link to="/favorite" className="action-button">
-                        <span className="material-symbols-outlined">favorite_border</span>
+                    <Link to="/favorite" className="action-button favorite-header-btn">
+                        <span className="material-symbols-outlined">
+                            {likedProductIds.length > 0 ? 'favorite' : 'favorite_border'}
+                        </span>
+                        {likedProductIds.length > 0 && (
+                            <span className="favorite-badge">{likedProductIds.length}</span>
+                        )}
                     </Link>
 
                     {user ? (

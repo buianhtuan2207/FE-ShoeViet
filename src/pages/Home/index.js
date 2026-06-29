@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import ProductCard from '../../components/ProductCard';
 import brandService from '../../services/BrandService';
 import categoryService from '../../services/CategoryService';
@@ -47,6 +47,7 @@ function Home() {
     const [categories, setCategories] = useState([]);
     const [latestProducts, setLatestProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const location = useLocation();
 
     // 2. Gọi API ngay khi Component vừa được mount lên giao diện
     useEffect(() => {
@@ -85,7 +86,7 @@ function Home() {
         };
 
         fetchHomeData();
-    }, []);
+    }, [location.key]);
 
     // Hiển thị màn hình chờ trong lúc đợi API trả kết quả
     if (loading) {
