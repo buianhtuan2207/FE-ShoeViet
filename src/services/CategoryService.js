@@ -29,6 +29,11 @@ const categoryService = {
     deleteCategory: async (id) => {
         const response = await API.delete(`/categories/${id}`);
         return response.data;
+    },
+
+    getHomeCategories: async () => {
+        const response = await API.get('/categories/home');
+        return response.data;
     }
 };
 

@@ -169,10 +169,11 @@ function Header() {
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('userInfo');
+        localStorage.clear();
         clearAllFavorites();
         setUser(null);
         window.dispatchEvent(new Event('authChange'));
-        navigate('/login');
+        window.location.href = '/login';
     };
 
     return (

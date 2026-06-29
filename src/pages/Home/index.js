@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Link, useLocation} from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import ProductCard from '../../components/ProductCard';
 import brandService from '../../services/BrandService';
 import categoryService from '../../services/CategoryService';
@@ -11,18 +11,14 @@ const TECH_FEATURES = [
     { icon: 'water_drop', title: 'Lõi Hydro-Shield', desc: 'Lớp chống chịu thời tiết giúp bạn thoải mái di chuyển trong mọi điều kiện.' },
 ];
 
-// Component con hiển thị Danh mục
 const CategoryCard = ({ data }) => {
-    // Đọc các trường dữ liệu thực tế từ DB (name, description thay vì title, subtitle)
-    const { id, name, description, isLarge } = data;
+    const { id, name, description, isLarge, imageUrl } = data;
 
-    // Gán ảnh mặc định nếu trong DB chưa có cột lưu link ảnh
     const fallbackImg = isLarge
         ? 'https://images.unsplash.com/photo-1595950653106-6c9ebd614c3a?q=80&w=800&auto=format&fit=crop'
         : 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=800&auto=format&fit=crop';
 
-    // Giả sử sau này DB bạn có trường imageUrl, ta có thể dùng: const img = data.imageUrl || fallbackImg;
-    const img = fallbackImg;
+    const img = imageUrl || fallbackImg;
 
     return (
         <Link to={`/products?category=${id}`} className={`category-card ${isLarge ? 'category-card-large' : ''}`}>
@@ -42,38 +38,36 @@ const CategoryCard = ({ data }) => {
 };
 
 function Home() {
-    // 1. Khởi tạo State để lưu trữ dữ liệu từ API
     const [brands, setBrands] = useState([]);
     const [categories, setCategories] = useState([]);
     const [latestProducts, setLatestProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const location = useLocation();
 
-    // 2. Gọi API ngay khi Component vừa được mount lên giao diện
     useEffect(() => {
         const fetchHomeData = async () => {
             try {
                 setLoading(true);
 
-                // Gọi song song cả 3 API cùng lúc để tối ưu tốc độ load
                 const [brandsData, categoriesData, productsData] = await Promise.all([
-                    brandService.getAllBrands(),
-                    categoryService.getAllCategories(),
-                    productService.getAllProducts()
+                    brandService.getAllBrands().catch(() => []),
+                    categoryService.getHomeCategories().catch(() => []),
+                    productService.getAllProducts().catch(() => [])
                 ]);
 
-                setBrands(brandsData);
+                if (brandsData && brandsData.length > 0) {
+                    const activeBrands = brandsData.filter(brand => brand.is_action);
+                    setBrands(activeBrands);
+                }
 
-                // Xử lý Categories: Chỉ lấy 3 danh mục đầu tiên và đánh dấu cái đầu tiên là "isLarge"
                 if (categoriesData && categoriesData.length > 0) {
-                    const formattedCategories = categoriesData.slice(0, 3).map((cat, index) => ({
+                    const formattedCategories = categoriesData.map((cat, index) => ({
                         ...cat,
                         isLarge: index === 0
                     }));
                     setCategories(formattedCategories);
                 }
 
-                // Xử lý Products: Lấy 4 sản phẩm mới nhất
                 if (productsData && productsData.length > 0) {
                     setLatestProducts(productsData.slice(0, 4));
                 }
@@ -88,14 +82,12 @@ function Home() {
         fetchHomeData();
     }, [location.key]);
 
-    // Hiển thị màn hình chờ trong lúc đợi API trả kết quả
     if (loading) {
         return <div style={{ textAlign: 'center', padding: '100px', fontSize: '20px' }}>Đang tải dữ liệu trang chủ...</div>;
     }
 
     return (
         <div className="home-wrapper">
-            {/* HERO SECTION */}
             <section className="hero-section">
                 <div className="hero-bg-layer">
                     <img alt="Hero background" src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=2000&auto=format&fit=crop" className="hero-bg-img" />
@@ -121,7 +113,6 @@ function Home() {
                 </div>
             </section>
 
-            {/* BRANDS SECTION - Dữ liệu thực từ API */}
             {brands.length > 0 && (
                 <section className="brands-section">
                     <div className="container center-text">
@@ -135,7 +126,6 @@ function Home() {
                 </section>
             )}
 
-            {/* CATEGORIES SECTION - Dữ liệu thực từ API */}
             {categories.length > 0 && (
                 <section className="categories-section">
                     <div className="container">
@@ -155,20 +145,18 @@ function Home() {
                 </section>
             )}
 
-            {/* LATEST PRODUCTS SECTION */}
             <section className="products-section">
                 <div className="container">
                     <div className="section-header">
                         <div>
                             <h2 className="section-title">Sản phẩm mới nhất</h2>
-                            <p className="section-desc">Tuyển chọn kỹ lưỡng những mẫu giày mới nhất từ chúng tôi.</p>
+                            <p className="section-desc">Tuyển chọn kỹ lurỡng những mẫu giày mới nhất từ chúng tôi.</p>
                         </div>
                         <Link to="/product" className="view-all-link">Xem Tất Cả</Link>
                     </div>
 
                     {latestProducts.length > 0 ? (
                         <div className="products-grid">
-                            {/* CODE MỚI RẤT GỌN Ở ĐÂY */}
                             {latestProducts.map(product => (
                                 <ProductCard key={product.id} data={product} />
                             ))}
@@ -179,7 +167,6 @@ function Home() {
                 </div>
             </section>
 
-            {/* TECHNOLOGY SECTION */}
             <section className="tech-section">
                 <div className="container">
                     <div className="tech-grid">

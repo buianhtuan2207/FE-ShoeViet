@@ -1,31 +1,49 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const FavoriteContext = createContext();
 
 export const FavoriteProvider = ({ children }) => {
-    // Kho lưu trữ danh sách ID của các sản phẩm đã được thích: Ví dụ [1, 5, 12]
     const [likedProductIds, setLikedProductIds] = useState([]);
+
+    // Theo dõi token để quản lý trạng thái cô lập giữa các tài khoản
+    const token = localStorage.getItem('accessToken');
+
+    // Lắng nghe token: Nếu logout (token mất) thì reset sạch sẽ trạng thái lập tức
+    useEffect(() => {
+        if (!token) {
+            setLikedProductIds([]);
+        }
+    }, [token]);
 
     // Hàm cập nhật trạng thái khi nhấn tim ở BẤT KỲ ĐÂU
     const setProductLikedStatus = (productId, isLiked) => {
+        // Chặn thao tác nếu user chưa đăng nhập
+        if (!localStorage.getItem('accessToken')) return;
+
         setLikedProductIds(prevIds => {
             if (isLiked) {
-                // Nếu thích -> Thêm ID vào mảng (nếu chưa có)
                 if (!prevIds.includes(productId)) return [...prevIds, productId];
                 return prevIds;
             } else {
-                // Nếu bỏ thích -> Xóa ID khỏi mảng
                 return prevIds.filter(id => id !== productId);
             }
         });
     };
 
-    // Hàm đồng bộ nhanh mảng ID từ API danh sách sản phẩm đổ về
+    // Hàm đồng bộ mảng ID từ danh sách sản phẩm đổ về
     const syncInitialHomeData = (products) => {
-        if (!products) return;
+        // 🎯 KHẮC PHỤC: Nếu không có token đăng nhập, tuyệt đối không đồng bộ trạng thái "isLiked" lung tung
+        if (!localStorage.getItem('accessToken') || !products) {
+            return;
+        }
+
         const activeIds = products.filter(p => p.isLiked || p.liked).map(p => p.id);
+
         setLikedProductIds(prev => {
-            // Gộp các ID mới mà không làm trùng lặp
+            // Nếu mảng cũ trống (vừa đổi tài khoản), thay thế hoàn toàn chứ không gộp bừa bãi
+            if (prev.length === 0) return activeIds;
+
+            // Nếu gộp, đảm bảo dữ liệu luôn được cập nhật chính xác theo danh sách mới nhất từ API
             const merged = new Set([...prev, ...activeIds]);
             return Array.from(merged);
         });
