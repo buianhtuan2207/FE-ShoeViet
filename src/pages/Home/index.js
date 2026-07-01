@@ -4,7 +4,7 @@ import ProductCard from '../../components/ProductCard';
 import brandService from '../../services/BrandService';
 import categoryService from '../../services/CategoryService';
 import productService from '../../services/ProductService';
-import './Home.css';
+import styles from './Home.module.scss';
 
 const TECH_FEATURES = [
     { icon: 'speed', title: 'Thân Giày Aero-Mesh', desc: 'Thoáng khí tối đa mà vẫn giữ được sự hỗ trợ ôm sát chân hoàn hảo.' },
@@ -21,16 +21,16 @@ const CategoryCard = ({ data }) => {
     const img = imageUrl || fallbackImg;
 
     return (
-        <Link to={`/products?category=${id}`} className={`category-card ${isLarge ? 'category-card-large' : ''}`}>
-            <img src={img} alt={name} className="category-img" />
-            <div className="category-overlay">
+        <Link to={`/products?category=${id}`} className={`${styles['category-card']} ${isLarge ? styles['category-card-large'] : ''}`}>
+            <img src={img} alt={name} className={styles['category-img']} />
+            <div className={styles['category-overlay']}>
                 {isLarge ? (
                     <>
-                        <h3 className="category-title-large">{name}</h3>
-                        <p className="category-subtitle">{description}</p>
+                        <h3 className={styles['category-title-large']}>{name}</h3>
+                        <p className={styles['category-subtitle']}>{description}</p>
                     </>
                 ) : (
-                    <h3 className="category-title-small">{name}</h3>
+                    <h3 className={styles['category-title-small']}>{name}</h3>
                 )}
             </div>
         </Link>
@@ -87,39 +87,39 @@ function Home() {
     }
 
     return (
-        <div className="home-wrapper">
-            <section className="hero-section">
-                <div className="hero-bg-layer">
-                    <img alt="Hero background" src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=2000&auto=format&fit=crop" className="hero-bg-img" />
-                    <div className="hero-bg-gradient"></div>
+        <div className={styles['home-wrapper']}>
+            <section className={styles['hero-section']}>
+                <div className={styles['hero-bg-layer']}>
+                    <img alt="Hero background" src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=2000&auto=format&fit=crop" className={styles['hero-bg-img']} />
+                    <div className={styles['hero-bg-gradient']}></div>
                 </div>
 
-                <div className="hero-content">
-                    <h1 className="hero-title">
+                <div className={styles['hero-content']}>
+                    <h1 className={styles['hero-title']}>
                         Thiết Kế Dành Cho<br />Hiệu Suất.
                     </h1>
-                    <p className="hero-desc">
+                    <p className={styles['hero-desc']}>
                         Khám phá đỉnh cao của thẩm mỹ thành thị. Bộ sưu tập Apex V2 mới đã ra mắt, định nghĩa lại mọi giới hạn trên đường phố.
                     </p>
-                    <div className="hero-actions">
-                        <Link to="/product" className="btn-primary" style={{ display: 'inline-flex', textDecoration: 'none' }}>
-                            <span className="btn-text">Mua ngay</span>
-                            <div className="btn-primary-hover"></div>
+                    <div className={styles['hero-actions']}>
+                        <Link to="/product" className={styles['btn-primary']} style={{ display: 'inline-flex', textDecoration: 'none' }}>
+                            <span className={styles['btn-text']}>Mua ngay</span>
+                            <div className={styles['btn-primary-hover']}></div>
                         </Link>
-                        <Link to="/about" className="btn-secondary" style={{ display: 'inline-flex', textDecoration: 'none' }}>
-                            <span className="btn-text">Khám phá</span>
+                        <Link to="/about" className={styles['btn-secondary']} style={{ display: 'inline-flex', textDecoration: 'none' }}>
+                            <span className={styles['btn-text']}>Khám phá</span>
                         </Link>
                     </div>
                 </div>
             </section>
 
             {brands.length > 0 && (
-                <section className="brands-section">
-                    <div className="container center-text">
-                        <h2 className="section-subtitle">Được Tin Dùng Bởi Các Biểu Tượng Toàn Cầu</h2>
-                        <div className="brands-list">
+                <section className={styles['brands-section']}>
+                    <div className={`${styles.container} ${styles['center-text']}`}>
+                        <h2 className={styles['section-subtitle']}>Được Tin Dùng Bởi Các Biểu Tượng Toàn Cầu</h2>
+                        <div className={styles['brands-list']}>
                             {brands.map((brand) => (
-                                <span key={brand.id} className="brand-item">{brand.name.toUpperCase()}</span>
+                                <span key={brand.id} className={styles['brand-item']}>{brand.name.toUpperCase()}</span>
                             ))}
                         </div>
                     </div>
@@ -127,16 +127,16 @@ function Home() {
             )}
 
             {categories.length > 0 && (
-                <section className="categories-section">
-                    <div className="container">
-                        <div className="section-header">
+                <section className={styles['categories-section']}>
+                    <div className={styles.container}>
+                        <div className={styles['section-header']}>
                             <div>
-                                <h2 className="section-title">Danh Mục Giày</h2>
-                                <p className="section-desc">Khám phá các bộ sưu tập giày chuyên dụng của chúng tôi.</p>
+                                <h2 className={styles['section-title']}>Danh Mục Giày</h2>
+                                <p className={styles['section-desc']}>Khám phá các bộ sưu tập giày chuyên dụng của chúng tôi.</p>
                             </div>
-                            <Link to="/products" className="view-all-link">Xem Tất Cả</Link>
+                            <Link to="/products" className={styles['view-all-link']}>Xem Tất Cả</Link>
                         </div>
-                        <div className="categories-grid">
+                        <div className={styles['categories-grid']}>
                             {categories.map(category => (
                                 <CategoryCard key={category.id} data={category} />
                             ))}
@@ -145,18 +145,18 @@ function Home() {
                 </section>
             )}
 
-            <section className="products-section">
-                <div className="container">
-                    <div className="section-header">
+            <section className={styles['products-section']}>
+                <div className={styles.container}>
+                    <div className={styles['section-header']}>
                         <div>
-                            <h2 className="section-title">Sản phẩm mới nhất</h2>
-                            <p className="section-desc">Tuyển chọn kỹ lurỡng những mẫu giày mới nhất từ chúng tôi.</p>
+                            <h2 className={styles['section-title']}>Sản phẩm mới nhất</h2>
+                            <p className={styles['section-desc']}>Tuyển chọn kỹ lưỡng những mẫu giày mới nhất từ chúng tôi.</p>
                         </div>
-                        <Link to="/product" className="view-all-link">Xem Tất Cả</Link>
+                        <Link to="/product" className={styles['view-all-link']}>Xem Tất Cả</Link>
                     </div>
 
                     {latestProducts.length > 0 ? (
-                        <div className="products-grid">
+                        <div className={styles['products-grid']}>
                             {latestProducts.map(product => (
                                 <ProductCard key={product.id} data={product} />
                             ))}
@@ -167,33 +167,33 @@ function Home() {
                 </div>
             </section>
 
-            <section className="tech-section">
-                <div className="container">
-                    <div className="tech-grid">
-                        <div className="tech-content">
-                            <span className="section-subtitle block-subtitle">Đổi Mới</span>
-                            <h2 className="section-title tech-title">Công Nghệ Không Trọng Lực.</h2>
-                            <p className="section-desc tech-desc">
+            <section className={styles['tech-section']}>
+                <div className={styles.container}>
+                    <div className={styles['tech-grid']}>
+                        <div className={styles['tech-content']}>
+                            <span className={`${styles['section-subtitle']} ${styles['block-subtitle']}`}>Đổi Mới</span>
+                            <h2 className={`${styles['section-title']} ${styles['tech-title']}`}>Công Nghệ Không Trọng Lực.</h2>
+                            <p className={`${styles['section-desc']} ${styles['tech-desc']}`}>
                                 Lớp đệm đế giữa độc quyền của chúng tôi mang lại khả năng hoàn trả năng lượng chưa từng có mà vẫn duy trì tính ổn định của cấu trúc. Được thiết kế trong phòng thí nghiệm, kiểm chứng trên đường phố.
                             </p>
 
-                            <div className="tech-features-list">
+                            <div className={styles['tech-features-list']}>
                                 {TECH_FEATURES.map((feature, index) => (
-                                    <div key={index} className="feature-item">
-                                        <div className="feature-icon-wrapper">
-                                            <span className="material-symbols-outlined feature-icon">{feature.icon}</span>
+                                    <div key={index} className={styles['feature-item']}>
+                                        <div className={styles['feature-icon-wrapper']}>
+                                            <span className={`material-symbols-outlined ${styles['feature-icon']}`}>{feature.icon}</span>
                                         </div>
                                         <div>
-                                            <h4 className="feature-title">{feature.title}</h4>
-                                            <p className="feature-desc">{feature.desc}</p>
+                                            <h4 className={styles['feature-title']}>{feature.title}</h4>
+                                            <p className={styles['feature-desc']}>{feature.desc}</p>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                        <div className="tech-visual">
-                            <div className="tech-visual-bg"></div>
-                            <img alt="Công nghệ giày" src="https://images.unsplash.com/photo-1618354691438-25bc04584c23?q=80&w=1000&auto=format&fit=crop" className="tech-img" />
+                        <div className={styles['tech-visual']}>
+                            <div className={styles['tech-visual-bg']}></div>
+                            <img alt="Công nghệ giày" src="https://images.unsplash.com/photo-1618354691438-25bc04584c23?q=80&w=1000&auto=format&fit=crop" className={styles['tech-img']} />
                         </div>
                     </div>
                 </div>
