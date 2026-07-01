@@ -5,6 +5,8 @@ const navItems = [
     { id: 'dashboard', label: 'Bảng điều khiển', icon: 'dashboard' },
     { id: 'accounts', label: 'Quản lý tài khoản', icon: 'group' },
     { id: 'products', label: 'Quản lý sản phẩm', icon: 'inventory_2' },
+    { id: 'categories', label: 'Quản lý danh mục', icon: 'category' },
+    { id: 'brands', label: 'Quản lý thương hiệu', icon: 'branding_watermark' },
     { id: 'coupons', label: 'Quản lý mã giảm giá', icon: 'sell' },
     { id: 'orders', label: 'Quản lý đơn hàng', icon: 'shopping_cart' },
 ];
