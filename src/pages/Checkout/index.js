@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import './Checkout.css';
+import CartService from '../../services/CartService';
+import OrderService from '../../services/OrderService';
+import { userService } from '../../services/UserService';
 
 function Checkout() {
     // 1. State quản lý thông tin giao hàng
@@ -16,6 +19,73 @@ function Checkout() {
     // 2. State quản lý phương thức thanh toán
     const [paymentMethod, setPaymentMethod] = useState('cod');
 
+    // 3. State quản lý sản phẩm trong giỏ
+    const [items, setItems] = useState([]);
+
+    // 4. State người dùng / order submit
+    const [userId, setUserId] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('userInfo');
+        if (storedUser) {
+            try {
+                const parsed = JSON.parse(storedUser);
+                if (parsed.id) {
+                    setUserId(parsed.id);
+                }
+                setFormData(prev => ({
+                    ...prev,
+                    fullName: parsed.fullName || prev.fullName,
+                    phone: parsed.phone || prev.phone,
+                    address: parsed.address || prev.address
+                }));
+            } catch {
+                // Ignore invalid cached profile
+            }
+        }
+
+        if (!userId) {
+            userService.getMyProfile()
+                .then(profile => {
+                    if (profile?.id) {
+                        setUserId(profile.id);
+                    }
+                    setFormData(prev => ({
+                        ...prev,
+                        fullName: profile?.fullName || prev.fullName,
+                        phone: profile?.phone || prev.phone,
+                        address: profile?.address || prev.address
+                    }));
+                })
+                .catch(() => {
+                    // Không block checkout; chỉ gửi cảnh báo khi submit nếu cần
+                });
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        setItems(CartService.getCart());
+
+        const onCartUpdated = () => {
+            setItems(CartService.getCart());
+        };
+
+        window.addEventListener('cartUpdated', onCartUpdated);
+        return () => window.removeEventListener('cartUpdated', onCartUpdated);
+    }, []);
+
+    const hasItems = items.length > 0;
+
+    const subtotal = useMemo(
+        () => items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0),
+        [items]
+    );
+
+    const discount = hasItems ? 25.0 : 0;
+    const total = Math.max(0, subtotal - discount);
+
+
     // Hàm xử lý thay đổi input
     const handleInputChange = (e) => {
         const { id, value } = e.target;
@@ -23,22 +93,61 @@ function Checkout() {
     };
 
     // Hàm xử lý khi nhấn Hoàn tất
-    const handleCompletePurchase = () => {
-        // Kiểm tra nhanh các trường bắt buộc
+    const handleCompletePurchase = async () => {
+        if (!hasItems) {
+            alert('Giỏ hàng đang trống. Vui lòng thêm sản phẩm trước khi thanh toán!');
+            return;
+        }
+
         if (!formData.fullName || !formData.phone || !formData.address) {
-            alert("Vui lòng điền đầy đủ thông tin giao hàng!");
+            alert('Vui lòng điền đầy đủ thông tin giao hàng!');
+            return;
+        }
+
+        if (!userId) {
+            alert('Không thể tạo đơn hàng. Vui lòng đăng nhập lại hoặc thử tải lại trang.');
+            return;
+        }
+
+        const shippingAddress = [formData.address, formData.ward, formData.district, formData.province]
+            .filter(Boolean)
+            .join(', ');
+
+        const orderItems = items.map((item) => ({
+            productId: item.productId || item.id,
+            productVariantId: item.productVariantId || item.variantId,
+            quantity: item.quantity || 1
+        }));
+
+        const hasMissingVariant = orderItems.some(item => !item.productVariantId);
+        if (hasMissingVariant) {
+            alert('Một hoặc nhiều sản phẩm trong giỏ thiếu thông tin variant. Vui lòng cập nhật lại giỏ hàng.');
             return;
         }
 
         const orderData = {
-            customer: formData,
-            payment: paymentMethod,
-            total: 400.00,
-            date: new Date().toISOString()
+            userId,
+            shippingName: formData.fullName,
+            shippingPhone: formData.phone,
+            shippingAddress,
+            notes: formData.note || '',
+            discountAmount: discount,
+            orderItems
         };
 
-        console.log("Đơn hàng đã sẵn sàng gửi lên Server:", orderData);
-        alert(`Chúc mừng ${formData.fullName}! Đơn hàng của bạn đã được đặt thành công.`);
+        setIsSubmitting(true);
+        try {
+            const createdOrder = await OrderService.createOrder(orderData);
+            CartService.clearCart();
+            setItems([]);
+            alert(`Đặt hàng thành công! Mã đơn hàng: ${createdOrder.orderCode}`);
+        } catch (error) {
+            const message = error?.response?.data || error?.message || 'Đặt hàng thất bại. Vui lòng thử lại.';
+            console.error('Order submit failed', error);
+            alert(message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -159,31 +268,47 @@ function Checkout() {
                         <h2 className="summary-title">Tóm tắt đơn hàng</h2>
 
                         <div className="items-preview">
-                            <div className="preview-item">
-                                <div className="img-box">
-                                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUojDYP7_JQ7RJQ5txb9AIxRXlzW-tG4ZvXFBHVSkSrrb6OSZ7efqxxqjLN3BDU_b3JO-VqWjEik2yjSRLlpIVL2FXZ5WM7b6D4FFWLggmYB68sbmDeliqi90dy_CB4mUil-KFYa9568oFeCl34EdWqR1JNBl1x6Cgo41MbEp4Kd10xp_AF4TjiMLGKubXO5MPqk5ar31fbLIR-rxXmzsccBSwQCMu-BmEQXmAWOe3ILtZnB43u7AlHoxw40RuCwFLfEozZsBnZjU" alt="Giày" />
-                                </div>
-                                <div className="item-text">
-                                    <h4>Velocity Runner Pro</h4>
-                                    <p>Size: M 10 | Màu: Crimson</p>
-                                    <div className="price-row">
-                                        <span>SL: 1</span>
-                                        <span className="price">$180.00</span>
+                            {hasItems ? (
+                                items.map((item) => (
+                                    <div className="preview-item" key={CartService.buildKey(item)}>
+                                        <div className="img-box">
+                                            <img
+                                                src={item.image}
+                                                alt={item.name}
+                                                onError={(e) => {
+                                                    e.target.src = 'https://via.placeholder.com/150?text=Giay+The+Thao';
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="item-text">
+                                            <h4>{item.name}</h4>
+                                            <p>
+                                                Size: {item.size} | Màu: {item.color}
+                                            </p>
+                                            <div className="price-row">
+                                                <span>SL: {item.quantity}</span>
+                                                <span className="price">${(item.price * item.quantity).toFixed(2)}</span>
+                                            </div>
+                                        </div>
                                     </div>
+                                ))
+                            ) : (
+                                <div className="empty-items-preview">
+                                    <p>Chưa có sản phẩm nào trong giỏ hàng.</p>
                                 </div>
-                            </div>
-                            {/* Thêm các sản phẩm khác tương tự ở đây */}
+                            )}
                         </div>
 
                         <div className="total-lines">
-                            <div className="line"><span>Tạm tính</span><span>$400.00</span></div>
+                            <div className="line"><span>Tạm tính</span><span>${subtotal.toFixed(2)}</span></div>
                             <div className="line"><span>Vận chuyển</span><span className="free">Miễn phí</span></div>
-                            <div className="line total"><span>Tổng cộng</span><span>$400.00</span></div>
+                            <div className="line total"><span>Tổng cộng</span><span>${total.toFixed(2)}</span></div>
                         </div>
 
-                        <button className="btn-complete" onClick={handleCompletePurchase}>
+
+                        <button className="btn-complete" onClick={handleCompletePurchase} disabled={isSubmitting}>
                             <span className="material-symbols-outlined">shopping_bag</span>
-                            Hoàn tất đặt hàng
+                            {isSubmitting ? 'Đang xử lý...' : 'Hoàn tất đặt hàng'}
                         </button>
                         <p className="terms-text">Bằng việc hoàn tất, bạn đồng ý với Điều khoản dịch vụ.</p>
                     </div>

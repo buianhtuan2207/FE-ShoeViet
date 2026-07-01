@@ -109,11 +109,11 @@ function Home() {
                         Khám phá đỉnh cao của thẩm mỹ thành thị. Bộ sưu tập Apex V2 mới đã ra mắt, định nghĩa lại mọi giới hạn trên đường phố.
                     </p>
                     <div className="hero-actions">
-                        <Link to="/products" className="btn-primary" style={{ display: 'inline-flex', textDecoration: 'none' }}>
+                        <Link to="/product" className="btn-primary" style={{ display: 'inline-flex', textDecoration: 'none' }}>
                             <span className="btn-text">Mua ngay</span>
                             <div className="btn-primary-hover"></div>
                         </Link>
-                        <Link to="/categories" className="btn-secondary" style={{ display: 'inline-flex', textDecoration: 'none' }}>
+                        <Link to="/about" className="btn-secondary" style={{ display: 'inline-flex', textDecoration: 'none' }}>
                             <span className="btn-text">Khám phá</span>
                         </Link>
                     </div>
