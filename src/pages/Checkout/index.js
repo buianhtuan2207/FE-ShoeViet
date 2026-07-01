@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import './Checkout.css';
 import CartService from '../../services/CartService';
 import OrderService from '../../services/OrderService';
 import { userService } from '../../services/UserService';
+import styles from './Checkout.module.scss';
 
 function Checkout() {
     // 1. State quản lý thông tin giao hàng
@@ -85,7 +85,6 @@ function Checkout() {
     const discount = hasItems ? 25.0 : 0;
     const total = Math.max(0, subtotal - discount);
 
-
     // Hàm xử lý thay đổi input
     const handleInputChange = (e) => {
         const { id, value } = e.target;
@@ -151,16 +150,16 @@ function Checkout() {
     };
 
     return (
-        <main className="checkout-main">
-            <h1 className="checkout-title">Thanh toán</h1>
+        <main className={styles['checkout-main']}>
+            <h1 className={styles['checkout-title']}>Thanh toán</h1>
 
-            <div className="checkout-grid">
+            <div className={styles['checkout-grid']}>
                 {/* Cột trái: Thông tin Form */}
-                <div className="left-column">
-                    <section className="form-section">
-                        <h2 className="section-title">Thông tin giao hàng</h2>
-                        <form className="shipping-form">
-                            <div className="input-group">
+                <div className={styles['left-column']}>
+                    <section className={styles['form-section']}>
+                        <h2 className={styles['section-title']}>Thông tin giao hàng</h2>
+                        <form className={styles['shipping-form']}>
+                            <div className={styles['input-group']}>
                                 <label htmlFor="fullName">Họ và tên</label>
                                 <input
                                     type="text" id="fullName"
@@ -170,7 +169,7 @@ function Checkout() {
                                 />
                             </div>
 
-                            <div className="input-group">
+                            <div className={styles['input-group']}>
                                 <label htmlFor="phone">Số điện thoại</label>
                                 <input
                                     type="tel" id="phone"
@@ -180,80 +179,80 @@ function Checkout() {
                                 />
                             </div>
 
-                            <div className="grid-3-col">
-                                <div className="input-group">
+                            <div className={styles['grid-3-col']}>
+                                <div className={styles['input-group']}>
                                     <label htmlFor="province">Tỉnh / Thành phố</label>
-                                    <div className="select-wrapper">
+                                    <div className={styles['select-wrapper']}>
                                         <select id="province" defaultValue="" onChange={handleInputChange}>
                                             <option value="" disabled>Chọn Tỉnh/Thành</option>
                                             <option value="hcm">Hồ Chí Minh</option>
                                             <option value="hn">Hà Nội</option>
                                             <option value="dn">Đà Nẵng</option>
                                         </select>
-                                        <span className="material-symbols-outlined dropdown-icon">expand_more</span>
+                                        <span className={`material-symbols-outlined ${styles['dropdown-icon']}`}>expand_more</span>
                                     </div>
                                 </div>
 
-                                <div className="input-group">
+                                <div className={styles['input-group']}>
                                     <label htmlFor="district">Quận / Huyện</label>
-                                    <div className="select-wrapper">
+                                    <div className={styles['select-wrapper']}>
                                         <select id="district" defaultValue="" onChange={handleInputChange}>
                                             <option value="" disabled>Chọn Quận/Huyện</option>
                                             <option value="q1">Quận 1</option>
                                             <option value="q2">Quận 2</option>
                                             <option value="q3">Quận 3</option>
                                         </select>
-                                        <span className="material-symbols-outlined dropdown-icon">expand_more</span>
+                                        <span className={`material-symbols-outlined ${styles['dropdown-icon']}`}>expand_more</span>
                                     </div>
                                 </div>
 
-                                <div className="input-group">
+                                <div className={styles['input-group']}>
                                     <label htmlFor="ward">Phường / Xã</label>
-                                    <div className="select-wrapper">
+                                    <div className={styles['select-wrapper']}>
                                         <select id="ward" defaultValue="" onChange={handleInputChange}>
                                             <option value="" disabled>Chọn Phường/Xã</option>
                                             <option value="pbn">Phường Bến Nghé</option>
                                             <option value="pda">Phường Đa Kao</option>
                                         </select>
-                                        <span className="material-symbols-outlined dropdown-icon">expand_more</span>
+                                        <span className={`material-symbols-outlined ${styles['dropdown-icon']}`}>expand_more</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="input-group">
+                            <div className={styles['input-group']}>
                                 <label htmlFor="address">Địa chỉ chi tiết</label>
                                 <input type="text" id="address" placeholder="Số nhà, tên đường..." onChange={handleInputChange} />
                             </div>
 
-                            <div className="input-group">
+                            <div className={styles['input-group']}>
                                 <label htmlFor="note">Ghi chú đơn hàng</label>
                                 <textarea id="note" rows="3" placeholder="Lời nhắn cho shipper..." onChange={handleInputChange}></textarea>
                             </div>
                         </form>
                     </section>
 
-                    <section className="form-section">
-                        <h2 className="section-title">Phương thức thanh toán</h2>
-                        <div className="payment-options">
-                            <label className={`payment-label ${paymentMethod === 'cod' ? 'active' : ''}`}>
+                    <section className={styles['form-section']}>
+                        <h2 className={styles['section-title']}>Phương thức thanh toán</h2>
+                        <div className={styles['payment-options']}>
+                            <label className={`${styles['payment-label']} ${paymentMethod === 'cod' ? styles.active : ''}`}>
                                 <input
                                     type="radio" name="payment"
                                     checked={paymentMethod === 'cod'}
                                     onChange={() => setPaymentMethod('cod')}
                                 />
-                                <div className="payment-info">
+                                <div className={styles['payment-info']}>
                                     <span>Thanh toán khi nhận hàng (COD)</span>
                                     <span className="material-symbols-outlined">local_shipping</span>
                                 </div>
                             </label>
 
-                            <label className={`payment-label ${paymentMethod === 'vnpay' ? 'active' : ''}`}>
+                            <label className={`${styles['payment-label']} ${paymentMethod === 'vnpay' ? styles.active : ''}`}>
                                 <input
                                     type="radio" name="payment"
                                     checked={paymentMethod === 'vnpay'}
                                     onChange={() => setPaymentMethod('vnpay')}
                                 />
-                                <div className="payment-info">
+                                <div className={styles['payment-info']}>
                                     <span>Thanh toán qua VNPay</span>
                                     <span className="material-symbols-outlined">account_balance</span>
                                 </div>
@@ -263,15 +262,15 @@ function Checkout() {
                 </div>
 
                 {/* Cột phải: Tóm tắt đơn hàng */}
-                <aside className="right-column">
-                    <div className="summary-sticky">
-                        <h2 className="summary-title">Tóm tắt đơn hàng</h2>
+                <aside className={styles['right-column']}>
+                    <div className={styles['summary-sticky']}>
+                        <h2 className={styles['summary-title']}>Tóm tắt đơn hàng</h2>
 
-                        <div className="items-preview">
+                        <div className={styles['items-preview']}>
                             {hasItems ? (
                                 items.map((item) => (
-                                    <div className="preview-item" key={CartService.buildKey(item)}>
-                                        <div className="img-box">
+                                    <div className={styles['preview-item']} key={CartService.buildKey(item)}>
+                                        <div className={styles['img-box']}>
                                             <img
                                                 src={item.image}
                                                 alt={item.name}
@@ -280,42 +279,42 @@ function Checkout() {
                                                 }}
                                             />
                                         </div>
-                                        <div className="item-text">
+                                        <div className={styles['item-text']}>
                                             <h4>{item.name}</h4>
                                             <p>
                                                 Size: {item.size} | Màu: {item.color}
                                             </p>
-                                            <div className="price-row">
+                                            <div className={styles['price-row']}>
                                                 <span>SL: {item.quantity}</span>
-                                                <span className="price">${(item.price * item.quantity).toFixed(2)}</span>
+                                                <span className={styles.price}>${(item.price * item.quantity).toFixed(2)}</span>
                                             </div>
                                         </div>
                                     </div>
                                 ))
                             ) : (
-                                <div className="empty-items-preview">
+                                <div className={styles['empty-items-preview']}>
                                     <p>Chưa có sản phẩm nào trong giỏ hàng.</p>
                                 </div>
                             )}
                         </div>
 
-                        <div className="total-lines">
-                            <div className="line"><span>Tạm tính</span><span>${subtotal.toFixed(2)}</span></div>
-                            <div className="line"><span>Vận chuyển</span><span className="free">Miễn phí</span></div>
-                            <div className="line total"><span>Tổng cộng</span><span>${total.toFixed(2)}</span></div>
+                        <div className={styles['total-lines']}>
+                            <div className={styles.line}><span>Tạm tính</span><span>${subtotal.toFixed(2)}</span></div>
+                            <div className={styles.line}><span>Vận chuyển</span><span className={styles.free}>Miễn phí</span></div>
+                            <div className={`${styles.line} ${styles.total}`}><span>Tổng cộng</span><span>${total.toFixed(2)}</span></div>
                         </div>
 
 
-                        <button className="btn-complete" onClick={handleCompletePurchase} disabled={isSubmitting}>
+                        <button className={styles['btn-complete']} onClick={handleCompletePurchase} disabled={isSubmitting}>
                             <span className="material-symbols-outlined">shopping_bag</span>
                             {isSubmitting ? 'Đang xử lý...' : 'Hoàn tất đặt hàng'}
                         </button>
-                        <p className="terms-text">Bằng việc hoàn tất, bạn đồng ý với Điều khoản dịch vụ.</p>
+                        <p className={styles['terms-text']}>Bằng việc hoàn tất, bạn đồng ý với Điều khoản dịch vụ.</p>
                     </div>
                 </aside>
             </div>
         </main>
     );
-};
+}
 
 export default Checkout;
