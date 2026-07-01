@@ -12,6 +12,7 @@ import Login from "../pages/Login";
 import ForgotPassword from "../pages/ForgotPassword";
 import OTPVerification from "../pages/OTPVerification";
 import ResetPassword from "../pages/ResetPassword";
+import About from "../pages/About";
 import Admin from "../pages/Admin";
 import Person from '../pages/Person';
 import History from '../pages/History';
@@ -35,18 +36,19 @@ function AppRoutes() {
                 <Route path="/admin" element={<Admin />} />
             </Route> */}
             <Route path="/admin" element={<Admin />} />
-
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/verify-otp" element={<OTPVerification />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* 2. Nhóm Route dùng MainLayout (Cần Header/Footer/Sidebar) */}
             <Route element={<MainLayout />}>
 
                 {/* --- NHÓM PUBLIC ROUTES: Ai cũng có thể truy cập tự do --- */}
-                <Route path="/register" element={<Register />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/verify-otp" element={<OTPVerification />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
+                
 
                 <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
                 <Route path="/product" element={<Product />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/detail/:id" element={<ProductDetail />} />

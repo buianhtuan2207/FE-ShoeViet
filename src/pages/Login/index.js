@@ -60,10 +60,12 @@ function Login() {
         }
     };
 
+
     // 4. Logic Đăng nhập Google
     const handleGoogleLoginSuccess = async (credentialResponse) => {
         setAlertMessage({ type: '', text: '' });
         setIsLoading(true);
+
 
         try {
             const idToken = credentialResponse.credential;

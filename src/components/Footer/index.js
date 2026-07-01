@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 function Footer() {
@@ -32,7 +33,7 @@ function Footer() {
                 <div className="footer-col">
                     <h4 className="footer-title">Company</h4>
                     <ul className="footer-nav">
-                        <li><a href="#">About</a></li>
+                        <li><Link to="/about">About</Link></li>
                         <li><a href="#">Support</a></li>
                         <li><a href="#">Privacy</a></li>
                     </ul>
