@@ -36,12 +36,19 @@ function Login() {
             const response = await authService.login(formData);
 
             // 1. Lưu thông tin vào localStorage như cũ
-            localStorage.setItem('accessToken', response.token);
-            localStorage.setItem('userInfo', JSON.stringify({
+            const loginUser = {
                 email: response.email,
                 fullName: response.fullName,
-                role: response.role
-            }));
+                role: response.role,
+                phone: response.phone || '',
+                address: response.address || ''
+            };
+            if (response.id) {
+                loginUser.id = response.id;
+            }
+
+            localStorage.setItem('accessToken', response.token);
+            localStorage.setItem('userInfo', JSON.stringify(loginUser));
 
             window.dispatchEvent(new Event('authChange'));
 

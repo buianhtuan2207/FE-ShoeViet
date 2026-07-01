@@ -100,6 +100,9 @@ function ProductDetail() {
 
         const cartItem = {
             id: product.id,
+            productId: product.id,
+            productVariantId: activeVariant.id,
+            variantId: activeVariant.id,
             name: product.name,
             image: productImages[0],
             price: activeVariant.price ?? product.basePrice,

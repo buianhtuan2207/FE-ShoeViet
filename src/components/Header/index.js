@@ -184,6 +184,7 @@ function Header() {
                 {/* 2. Menu Links (Đã sửa đổi thành cấu trúc Dropdown đa cột) */}
                 <div className="header-links">
                     <Link className="nav-link" to="/">Trang chủ</Link>
+                    <Link className="nav-link" to="/about">Giới thiệu</Link>
 
                     {/* KHỐI DROPDOWN SẢN PHẨM MỚI */}
                     <div className="nav-item-dropdown">
