@@ -18,6 +18,7 @@ import Person from '../pages/Person';
 import History from '../pages/History';
 
 import ProtectedRoute from '../components/ProtectedRoute';
+import Favorite from "../pages/Favorite";
 
 function AppRoutes() {
     return (
@@ -57,6 +58,7 @@ function AppRoutes() {
                 <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/my-profile" element={<Person />} />
+                    <Route path="/favorite" element={<Favorite />} />
                     <Route path="/history" element={<History />} />
                     {/* Nếu sau này bạn có thêm trang /profile, /order-history... thì ném vào đây luôn */}
                 </Route>

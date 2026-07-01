@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import brandService from '../../services/BrandService';
 import categoryService from '../../services/CategoryService';
 import searchService from '../../services/SearchService';
+import { useFavorites } from '../../context/FavoriteContext';
+
+import styles from './Header.module.scss';
 
 function Header() {
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
+    const { likedProductIds, clearAllFavorites } = useFavorites();
 
-    // Khai báo thêm State để lưu dữ liệu Menu từ API
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
 
-    // State cho tìm kiếm
     const [searchInput, setSearchInput] = useState('');
     const [searchSuggestions, setSearchSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -22,7 +23,6 @@ function Header() {
     const searchInputRef = useRef(null);
     const suggestionsRef = useRef(null);
 
-    //EFFECT 1: Lấy danh sách Categories và Brands từ API (Chỉ chạy 1 lần khi load trang)
     useEffect(() => {
         const fetchMenuData = async () => {
             try {
@@ -39,7 +39,6 @@ function Header() {
         fetchMenuData();
     }, []);
 
-    // 2. EFFECT 2: Kiểm tra trạng thái đăng nhập và hạn Token (Giữ nguyên logic chuẩn của bạn)
     useEffect(() => {
         const checkUserData = () => {
             const token = localStorage.getItem('accessToken');
@@ -75,13 +74,12 @@ function Header() {
         };
     }, []);
 
-    //Load lịch tìm kiếm từ localStorage
     useEffect(() => {
         const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
         setSearchHistory(history.slice(0, 5));
     }, []);
 
-    
+
     useEffect(() => {
         const debounceTimer = setTimeout(async () => {
             if (searchInput.trim().length >= 2) {
@@ -105,7 +103,6 @@ function Header() {
         return () => clearTimeout(debounceTimer);
     }, [searchInput, searchHistory]);
 
-    // Xử lý click outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -122,7 +119,6 @@ function Header() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-
     const handleSearchChange = (e) => {
         setSearchInput(e.target.value);
     };
@@ -130,12 +126,10 @@ function Header() {
     const handleSearchSubmit = (e) => {
         e.preventDefault();
         if (searchInput.trim()) {
-            // Lưu vào lịch tìm kiếm
             const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
             const newHistory = [searchInput, ...history.filter(item => item !== searchInput)].slice(0, 10);
             localStorage.setItem('searchHistory', JSON.stringify(newHistory));
 
-            // Điều hướng đến trang tìm kiếm
             navigate(`/search?q=${encodeURIComponent(searchInput)}`);
             setSearchInput('');
             setShowSuggestions(false);
@@ -167,63 +161,59 @@ function Header() {
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('userInfo');
+        localStorage.clear();
+        clearAllFavorites();
         setUser(null);
         window.dispatchEvent(new Event('authChange'));
-        navigate('/login');
+        window.location.href = '/login';
     };
 
     return (
-        <nav className="header-nav">
-            <div className="header-container">
+        <nav className={styles['header-nav']}>
+            <div className={styles['header-container']}>
 
                 {/* 1. Logo */}
-                <Link className="header-logo" to="/">
+                <Link className={styles['header-logo']} to="/">
                     SHOEVIET
                 </Link>
 
-                {/* 2. Menu Links (Đã sửa đổi thành cấu trúc Dropdown đa cột) */}
-                <div className="header-links">
-                    <Link className="nav-link" to="/">Trang chủ</Link>
-                    <Link className="nav-link" to="/about">Giới thiệu</Link>
+                {/* 2. Menu Links */}
+                <div className={styles['header-links']}>
+                    {/*<Link className={styles['nav-link']} to="/">Trang chủ</Link>*/}
+                    <Link className={styles['nav-link']} to="/about">Giới thiệu</Link>
 
-                    {/* KHỐI DROPDOWN SẢN PHẨM MỚI */}
-                    <div className="nav-item-dropdown">
-                        <Link to="/product" className="nav-link dynamic-toggle">
+                    <div className={styles['nav-item-dropdown']}>
+                        <Link to="/product" className={`${styles['nav-link']} ${styles['dynamic-toggle']}`}>
                             Sản phẩm
-                            <span className="material-symbols-outlined dropdown-arrow">expand_more</span>
+                            <span className={`material-symbols-outlined ${styles['dropdown-arrow']}`}>expand_more</span>
                         </Link>
 
-                        {/* Khung chứa các cột phân loại */}
-                        <div className="mega-menu">
-                            {/* Cột 1: Danh mục - Đổi thành /product */}
-                            <div className="mega-column">
-                                <h4 className="mega-title">Danh mục</h4>
+                        <div className={styles['mega-menu']}>
+                            <div className={styles['mega-column']}>
+                                <h4 className={styles['mega-title']}>Danh mục</h4>
                                 {categories.slice(0, 6).map((cat) => (
-                                    <Link key={cat.id} to={`/product?categoryId=${cat.id}`} className="mega-item">
+                                    <Link key={cat.id} to={`/product?categoryId=${cat.id}`} className={styles['mega-item']}>
                                         {cat.name}
                                     </Link>
                                 ))}
                             </div>
 
-                            {/* Cột 2: Thương hiệu - Đổi thành /product */}
-                            <div className="mega-column">
-                                <h4 className="mega-title">Thương hiệu</h4>
+                            <div className={styles['mega-column']}>
+                                <h4 className={styles['mega-title']}>Thương hiệu</h4>
                                 {brands.slice(0, 6).map((brand) => (
-                                    <Link key={brand.id} to={`/product?brandId=${brand.id}`} className="mega-item">
+                                    <Link key={brand.id} to={`/product?brandId=${brand.id}`} className={styles['mega-item']}>
                                         {brand.name}
                                     </Link>
                                 ))}
                             </div>
 
-                            {/* Cột 3: Bộ sưu tập & Ưu đãi */}
-                            <div className="mega-column">
-                                <h4 className="mega-title">Xu hướng</h4>
-                                {/* ĐÃ SỬA: Đổi từ /products?sort=Newest thành /product?sortBy=Newest */}
-                                <Link to="/product?sortBy=Newest" className="mega-item highlight-new">
-                                    <span className="badge-dot new"></span> Hàng mới về
+                            <div className={styles['mega-column']}>
+                                <h4 className={styles['mega-title']}>Xu hướng</h4>
+                                <Link to="/product?sortBy=Newest" className={`${styles['mega-item']} ${styles['highlight-new']}`}>
+                                    <span className={`${styles['badge-dot']} ${styles.new}`}></span> Hàng mới về
                                 </Link>
-                                <Link to="/product?category=promotion" className="mega-item highlight-promo">
-                                    <span className="badge-dot promo"></span> Khuyến mãi hot
+                                <Link to="/product?category=promotion" className={`${styles['mega-item']} ${styles['highlight-promo']}`}>
+                                    <span className={`${styles['badge-dot']} ${styles.promo}`}></span> Khuyến mãi hot
                                 </Link>
                             </div>
                         </div>
@@ -231,13 +221,13 @@ function Header() {
                 </div>
 
                 {/* 3. Thanh tìm kiếm */}
-                <div className="search-container">
-                    <form onSubmit={handleSearchSubmit} className="search-form">
-                        <span className="material-symbols-outlined search-icon">search</span>
+                <div className={styles['search-container']}>
+                    <form onSubmit={handleSearchSubmit} className={styles['search-form']}>
+                        <span className={`material-symbols-outlined ${styles['search-icon']}`}>search</span>
                         <input
                             ref={searchInputRef}
                             type="text"
-                            className="search-input"
+                            className={styles['search-input']}
                             placeholder="Tìm kiếm giày..."
                             value={searchInput}
                             onChange={handleSearchChange}
@@ -251,21 +241,20 @@ function Header() {
                         />
                     </form>
 
-                    {/* Dropdown gợi ý tìm kiếm */}
                     {showSuggestions && (
-                        <div ref={suggestionsRef} className="search-suggestions">
+                        <div ref={suggestionsRef} className={styles['search-suggestions']}>
                             {searchInput.trim().length > 0 && searchSuggestions.length > 0 && (
                                 <>
-                                    <div className="suggestion-section">
-                                        <span className="suggestion-label">Sản phẩm</span>
+                                    <div className={styles['suggestion-section']}>
+                                        <span className={styles['suggestion-label']}>Sản phẩm</span>
                                         {searchSuggestions.map((suggestion) => (
                                             <div
                                                 key={suggestion.id}
-                                                className="suggestion-item"
+                                                className={styles['suggestion-item']}
                                                 onClick={() => handleSuggestionClick(suggestion)}
                                             >
                                                 <span className="material-symbols-outlined">search</span>
-                                                <span className="suggestion-text">{suggestion.name}</span>
+                                                <span className={styles['suggestion-text']}>{suggestion.name}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -273,24 +262,24 @@ function Header() {
                             )}
 
                             {searchInput.trim().length === 0 && searchHistory.length > 0 && (
-                                <div className="suggestion-section">
-                                    <span className="suggestion-label">Lịch sử tìm kiếm</span>
+                                <div className={styles['suggestion-section']}>
+                                    <span className={styles['suggestion-label']}>Lịch sử tìm kiếm</span>
                                     {searchHistory.map((item, index) => (
                                         <div
                                             key={index}
-                                            className="suggestion-item"
+                                            className={styles['suggestion-item']}
                                             onClick={() => handleHistoryClick(item)}
                                         >
                                             <span className="material-symbols-outlined">history</span>
-                                            <span className="suggestion-text">{item}</span>
+                                            <span className={styles['suggestion-text']}>{item}</span>
                                         </div>
                                     ))}
                                 </div>
                             )}
 
                             {searchInput.trim().length > 0 && searchSuggestions.length === 0 && (
-                                <div className="suggestion-section">
-                                    <div className="no-suggestions">
+                                <div className={styles['suggestion-section']}>
+                                    <div className={styles['no-suggestions']}>
                                         <span className="material-symbols-outlined">search_off</span>
                                         <span>Không tìm thấy sản phẩm phù hợp</span>
                                     </div>
@@ -301,51 +290,55 @@ function Header() {
                 </div>
 
                 {/* 4. Các nút Icon */}
-                <div className="header-icons">
-                    <Link to="/cart" className="action-button">
+                <div className={styles['header-icons']}>
+                    <Link to="/cart" className={styles['action-button']}>
                         <span className="material-symbols-outlined">shopping_cart</span>
                     </Link>
-                    <button className="action-button">
-                        <span className="material-symbols-outlined">favorite_border</span>
-                    </button>
+                    <Link to="/favorite" className={`${styles['action-button']} ${styles['favorite-header-btn']}`}>
+                        <span className="material-symbols-outlined">
+                            {likedProductIds.length > 0 ? 'favorite' : 'favorite_border'}
+                        </span>
+                        {likedProductIds.length > 0 && (
+                            <span className={styles['favorite-badge']}>{likedProductIds.length}</span>
+                        )}
+                    </Link>
 
                     {user ? (
-                        <div className="profile-menu-container">
-                            <div className="user-avatar-wrapper">
-                                <div className="user-avatar">
+                        <div className={styles['profile-menu-container']}>
+                            <div className={styles['user-avatar-wrapper']}>
+                                <div className={styles['user-avatar']}>
                                     {getInitials(user.fullName)}
                                 </div>
-                                <span className="user-fullname">{user.fullName}</span>
+                                <span className={styles['user-fullname']}>{user.fullName}</span>
                             </div>
 
-                            <div className="dropdown-menu">
+                            <div className={styles['dropdown-menu']}>
                                 {user.role === 'admin' && (
-                                    <Link to="/admin" className="dropdown-item" style={{ color: '#2563eb' }}>
+                                    <Link to="/admin" className={styles['dropdown-item']} style={{ color: '#2563eb' }}>
                                         <span className="material-symbols-outlined" style={{ color: '#2563eb' }}>dashboard</span>
                                         Trang quản trị Admin
                                     </Link>
                                 )}
-                                <Link to="/my-profile" className="dropdown-item">
+                                <Link to="/my-profile" className={styles['dropdown-item']}>
                                     <span className="material-symbols-outlined">account_circle</span>
                                     Thông tin tài khoản
                                 </Link>
-                                <Link to="/history" className="dropdown-item">
+                                <Link to="/history" className={styles['dropdown-item']}>
                                     <span className="material-symbols-outlined">history</span>
                                     Lịch sử mua hàng
                                 </Link>
-                                <button onClick={handleLogout} className="dropdown-item logout-btn">
+                                <button onClick={handleLogout} className={`${styles['dropdown-item']} ${styles['logout-btn']}`}>
                                     <span className="material-symbols-outlined">logout</span>
                                     Đăng xuất
                                 </button>
                             </div>
                         </div>
                     ) : (
-                        <Link to="/login" className="action-button">
+                        <Link to="/login" className={styles['action-button']}>
                             <span className="material-symbols-outlined">person</span>
                         </Link>
                     )}
                 </div>
-
             </div>
         </nav>
     );

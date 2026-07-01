@@ -1,0 +1,189 @@
+// --- BẢNG MÀU ĐỒNG BỘ ---
+$primary-color: #ff4757; // Đỏ cam nổi bật
+$text-title: #111827;
+$text-muted: #747d8c;
+$bg-color: #f8f9fa;
+
+.favorite-container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 20px;
+  font-family: system-ui, -apple-system, sans-serif;
+
+  // --- HEADER SECTION ---
+  .favorite-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f1f2f6;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: $text-title;
+        margin: 0;
+      }
+
+      .count-badge {
+        background-color: #ffe0e3;
+        color: $primary-color;
+        font-size: 0.85rem;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 20px;
+      }
+    }
+
+    .clear-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid #ced6e0;
+      color: #57606f;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+
+      span {
+        font-size: 18px;
+      }
+
+      &:hover {
+        background-color: #fff5f5;
+        border-color: $primary-color;
+        color: $primary-color;
+      }
+    }
+  }
+
+  // --- GRID LAYOUT SẢN PHẨM ---
+  .product-grid {
+    display: grid;
+    // Tự động co giãn số lượng cột dựa trên kích thước màn hình
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 30px;
+
+    // Hiệu ứng xuất hiện mượt mà cho lưới
+    animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  // --- EMPTY STATE (KHI KHÔNG CÓ SẢN PHẨM) ---
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+    border: 1px dashed #ced6e0;
+    animation: fadeIn 0.5s ease;
+
+    .icon-wrapper {
+      width: 80px;
+      height: 80px;
+      background-color: #fff5f5;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $primary-color;
+      margin-bottom: 20px;
+
+      span {
+        font-size: 40px;
+      }
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      color: $text-title;
+      margin: 0 0 10px 0;
+      font-weight: 700;
+    }
+
+    p {
+      color: $text-muted;
+      max-width: 400px;
+      margin: 0 0 28px 0;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .shop-now-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: $text-title; // Nút màu đen huyền bí huyền thoại của các brand Sneaker
+      color: #ffffff;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+      span {
+        font-size: 18px;
+        transition: transform 0.25s ease;
+      }
+
+      &:hover {
+        background-color: $primary-color; // Hover đổi sang đỏ cam rực rỡ
+        box-shadow: 0 10px 20px rgba(255, 71, 87, 0.3);
+        transform: translateY(-2px);
+
+        span {
+          transform: translateX(4px); // Mũi tên đẩy nhẹ về phía trước
+        }
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+}
+
+// --- ANIMATIONS ---
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// --- RESPONSIVE CHO MÀN HÌNH NHỎ ---
+@media (max-width: 640px) {
+  .favorite-container {
+    margin: 24px auto;
+
+    .favorite-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+
+      .clear-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}

@@ -23,5 +23,11 @@ export const userService = {
     updateProfile: async (profileData) => {
         const response = await API.put('/users/my-profile', profileData);
         return response.data;
+    },
+
+    // 5. Đổi mật khẩu 
+    changePassword: async (passwordData) => {
+        const response = await API.put('/users/change-password', passwordData);
+        return response.data;
     }
 };

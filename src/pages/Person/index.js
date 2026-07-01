@@ -1,232 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './Person.module.scss';
-import { Link } from 'react-router-dom';
+import { userService } from '../../services/UserService';
 
-function Person() {
-    const [isEditing, setIsEditing] = useState(false);
+// Import các component con
+import Sidebar from './components/Sidebar';
+import ChangePassword from './tabs/ChangePassword';
+import Info from './tabs/Info'; // Thêm import này
+
+const Person = () => {
+    const [activeTab, setActiveTab] = useState('profile');
+
     const [formData, setFormData] = useState({
-        fullName: 'Nguyễn Văn A',
-        email: 'user@example.com',
-        phone: '0123456789',
-        address: '123 Đường ABC, Thành phố HCM',
-        city: 'TP. Hồ Chí Minh',
-        district: 'Quận 1',
-        ward: 'Phường Bến Nghé',
-        postalCode: '70000'
+        fullName: '',
+        email: '',
+        phone: '',
+        address: ''
     });
 
-    const handleInputChange = (e) => {
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                setLoading(true);
+                const data = await userService.getMyProfile();
+                setFormData({
+                    fullName: data.fullName || '',
+                    email: data.email || '',
+                    phone: data.phone || '',
+                    address: data.address || ''
+                });
+            } catch (error) {
+                console.error('Lỗi khi lấy thông tin người dùng:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
+    const handleProfileChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSaveChanges = () => {
-        setIsEditing(false);
-        // TODO: Gọi API để lưu thông tin
-        console.log('Saving user data:', formData);
+    const handleProfileSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await userService.updateProfile(formData);
+            alert('Cập nhật thông tin thành công!');
+        } catch (error) {
+            console.error('Lỗi khi cập nhật:', error);
+            alert('Cập nhật thất bại. Vui lòng thử lại.');
+        }
+    };
+
+    if (loading) {
+        return (
+            <div style={{ textAlign: 'center', marginTop: '3rem', fontWeight: 'bold' }}>
+                Đang tải dữ liệu...
+            </div>
+        );
+    }
+
+    // Router nội bộ để quyết định render tab nào
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'password':
+                return <ChangePassword />;
+            case 'profile':
+            default:
+                // Truyền props xuống cho tab Info
+                return (
+                    <Info
+                        formData={formData}
+                        onChange={handleProfileChange}
+                        onSubmit={handleProfileSubmit}
+                    />
+                );
+        }
     };
 
     return (
         <main className={styles.mainContainer}>
-            <div className={styles.personContainer}>
-                {/* Header */}
-                <div className={styles.header}>
-                    <h1 className={styles.title}>Thông tin cá nhân</h1>
-                    <p className={styles.subtitle}>Quản lý thông tin tài khoản của bạn</p>
-                </div>
+            <Sidebar
+                userName={formData.fullName}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+            />
 
-                {/* Profile Card */}
-                <div className={styles.profileCard}>
-                    {/* Avatar Section */}
-                    <div className={styles.avatarSection}>
-                        <div className={styles.avatarContainer}>
-                            <img 
-                                src="https://via.placeholder.com/120" 
-                                alt="Avatar" 
-                                className={styles.avatar}
-                            />
-                        </div>
-                        {isEditing && (
-                            <button className={styles.uploadBtn}>
-                                Đổi ảnh đại diện
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Information Section */}
-                    <div className={styles.infoSection}>
-                        <div className={styles.infoGrid}>
-                            {/* Full Name */}
-                            <div className={styles.formGroup}>
-                                <label htmlFor="fullName">Họ và tên</label>
-                                <input
-                                    id="fullName"
-                                    name="fullName"
-                                    type="text"
-                                    value={formData.fullName}
-                                    onChange={handleInputChange}
-                                    disabled={!isEditing}
-                                    className={styles.input}
-                                />
-                            </div>
-
-                            {/* Email */}
-                            <div className={styles.formGroup}>
-                                <label htmlFor="email">Email</label>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    disabled={!isEditing}
-                                    className={styles.input}
-                                />
-                            </div>
-
-                            {/* Phone */}
-                            <div className={styles.formGroup}>
-                                <label htmlFor="phone">Số điện thoại</label>
-                                <input
-                                    id="phone"
-                                    name="phone"
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={handleInputChange}
-                                    disabled={!isEditing}
-                                    className={styles.input}
-                                />
-                            </div>
-
-                            {/* Address */}
-                            <div className={styles.formGroup}>
-                                <label htmlFor="address">Địa chỉ</label>
-                                <input
-                                    id="address"
-                                    name="address"
-                                    type="text"
-                                    value={formData.address}
-                                    onChange={handleInputChange}
-                                    disabled={!isEditing}
-                                    className={styles.input}
-                                />
-                            </div>
-
-                            {/* City */}
-                            <div className={styles.formGroup}>
-                                <label htmlFor="city">Tỉnh/Thành phố</label>
-                                <input
-                                    id="city"
-                                    name="city"
-                                    type="text"
-                                    value={formData.city}
-                                    onChange={handleInputChange}
-                                    disabled={!isEditing}
-                                    className={styles.input}
-                                />
-                            </div>
-
-                            {/* District */}
-                            <div className={styles.formGroup}>
-                                <label htmlFor="district">Quận/Huyện</label>
-                                <input
-                                    id="district"
-                                    name="district"
-                                    type="text"
-                                    value={formData.district}
-                                    onChange={handleInputChange}
-                                    disabled={!isEditing}
-                                    className={styles.input}
-                                />
-                            </div>
-
-                            {/* Ward */}
-                            <div className={styles.formGroup}>
-                                <label htmlFor="ward">Phường/Xã</label>
-                                <input
-                                    id="ward"
-                                    name="ward"
-                                    type="text"
-                                    value={formData.ward}
-                                    onChange={handleInputChange}
-                                    disabled={!isEditing}
-                                    className={styles.input}
-                                />
-                            </div>
-
-                            {/* Postal Code */}
-                            <div className={styles.formGroup}>
-                                <label htmlFor="postalCode">Mã bưu chính</label>
-                                <input
-                                    id="postalCode"
-                                    name="postalCode"
-                                    type="text"
-                                    value={formData.postalCode}
-                                    onChange={handleInputChange}
-                                    disabled={!isEditing}
-                                    className={styles.input}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className={styles.actionButtons}>
-                        {!isEditing ? (
-                            <>
-                                <button 
-                                    className={styles.btnPrimary}
-                                    onClick={() => setIsEditing(true)}
-                                >
-                                    Chỉnh sửa thông tin
-                                </button>
-                                <Link to="/changepassword" className={styles.btnSecondary}>
-                                    Đổi mật khẩu
-                                </Link>
-                            </>
-                        ) : (
-                            <>
-                                <button 
-                                    className={styles.btnPrimary}
-                                    onClick={handleSaveChanges}
-                                >
-                                    Lưu thay đổi
-                                </button>
-                                <button 
-                                    className={styles.btnSecondary}
-                                    onClick={() => setIsEditing(false)}
-                                >
-                                    Hủy
-                                </button>
-                            </>
-                        )}
-                    </div>
-                </div>
-
-                {/* Quick Links */}
-                <div className={styles.quickLinks}>
-                    <Link to="/history" className={styles.quickLinkCard}>
-                        <div className={styles.linkIcon}>📦</div>
-                        <h3>Đơn hàng của tôi</h3>
-                        <p>Xem lịch sử và trạng thái đơn hàng</p>
-                    </Link>
-                    <Link to="/wishlist" className={styles.quickLinkCard}>
-                        <div className={styles.linkIcon}>❤️</div>
-                        <h3>Danh sách yêu thích</h3>
-                        <p>Xem các sản phẩm đã lưu</p>
-                    </Link>
-                    <Link to="/reviews" className={styles.quickLinkCard}>
-                        <div className={styles.linkIcon}>⭐</div>
-                        <h3>Đánh giá của tôi</h3>
-                        <p>Xem các đánh giá đã gửi</p>
-                    </Link>
-                </div>
-            </div>
+            <section className={styles.contentArea}>
+                {renderContent()}
+            </section>
         </main>
     );
-}
+};
 
 export default Person;
