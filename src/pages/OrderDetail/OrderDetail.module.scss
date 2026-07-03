@@ -1,0 +1,71 @@
+.mainContainer {
+  padding: 24px;
+}
+.wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: sans-serif;
+}
+.header {
+  margin-bottom: 16px;
+}
+.title {
+  font-size: 24px;
+  margin: 0 0 4px 0;
+}
+.subtitle {
+  color: #666;
+  margin: 0;
+}
+.orderInfo {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: #fff;
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.02);
+}
+.itemsList {
+  margin-top: 16px;
+}
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+}
+.itemMeta {
+  display: flex;
+  flex-direction: column;
+}
+.itemName {
+  font-weight: 600;
+}
+.itemQty {
+  color: #666;
+  font-size: 13px;
+}
+.itemPrice {
+  min-width: 120px;
+  text-align: right;
+}
+.totals {
+  margin-top: 12px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 6px;
+}
+.total {
+  margin-top: 8px;
+  font-size: 16px;
+}
+.backLink {
+  color: #0b74de;
+  text-decoration: none;
+}
+.emptyState {
+  padding: 24px;
+  text-align: center;
+  color: #333;
+}

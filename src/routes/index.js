@@ -16,6 +16,7 @@ import About from "../pages/About";
 import Admin from "../pages/Admin";
 import Person from '../pages/Person';
 import History from '../pages/History';
+import OrderDetail from '../pages/OrderDetail';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 import Favorite from "../pages/Favorite";
@@ -60,6 +61,7 @@ function AppRoutes() {
                     <Route path="/my-profile" element={<Person />} />
                     <Route path="/favorite" element={<Favorite />} />
                     <Route path="/history" element={<History />} />
+                        <Route path="/order/:id" element={<OrderDetail />} />
                     {/* Nếu sau này bạn có thêm trang /profile, /order-history... thì ném vào đây luôn */}
                 </Route>
 
