@@ -1,4 +1,3 @@
-import API from './api';
 import productService from './ProductService';
 
 const searchService = {
@@ -18,24 +17,7 @@ const searchService = {
                 );
             }
 
-            // Lọc theo danh mục
-            if (filters.categoryId) {
-                results = results.filter(product => product.categoryId == filters.categoryId);
-            }
-
-            // Lọc theo thương hiệu
-            if (filters.brandId) {
-                results = results.filter(product => product.brandId == filters.brandId);
-            }
-
-            // Lọc theo khoảng giá
-            if (filters.minPrice !== undefined) {
-                results = results.filter(product => product.price >= filters.minPrice);
-            }
-            if (filters.maxPrice !== undefined) {
-                results = results.filter(product => product.price <= filters.maxPrice);
-            }
-
+  
             // Sắp xếp kết quả
             if (filters.sort) {
                 results = sortProducts(results, filters.sort);

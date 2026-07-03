@@ -100,7 +100,7 @@ function History() {
                                     </div>
                                 </div>
                                 <div className={styles.orderActions}>
-                                    <Link to={`/detail/${order.id}`} className={styles.viewLink}>Chi tiết</Link>
+                                    <Link to={`/order/${order.id}`} className={styles.viewLink}>Chi tiết</Link>
                                 </div>
                             </article>
                         ))
