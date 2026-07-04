@@ -9,7 +9,12 @@ const OrderService = {
   getOrdersByUser: async (userId) => {
     const response = await API.get(`/orders/user/${userId}`);
     return response.data;
-  }
+  },
+  
+  getOrderById: async (orderId) => {
+  const response = await API.get(`/orders/${orderId}`);
+  return response.data;
+}
 };
 
 export default OrderService;
