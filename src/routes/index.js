@@ -16,7 +16,7 @@ import About from "../pages/About";
 import Admin from "../pages/Admin";
 import Person from '../pages/Person';
 import History from '../pages/History';
-
+import OrderSuccess from '../pages/OrderSuccess';
 import ProtectedRoute from '../components/ProtectedRoute';
 import Favorite from "../pages/Favorite";
 
@@ -45,14 +45,13 @@ function AppRoutes() {
             <Route element={<MainLayout />}>
 
                 {/* --- NHÓM PUBLIC ROUTES: Ai cũng có thể truy cập tự do --- */}
-                
-
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/product" element={<Product />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/detail/:id" element={<ProductDetail />} />
-                <Route path="/cart" element={<Cart />} /> {/* Giỏ hàng cho xem tự do */}
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/order-success" element={<OrderSuccess />} />
 
                 {/* --- NHÓM PROTECTED ROUTES (CUSTOMER): Bắt buộc đăng nhập quyền Customer mới được Checkout --- */}
                 <Route element={<ProtectedRoute allowedRoles={['customer']} />}>

@@ -3,6 +3,7 @@ import CartService from '../../services/CartService';
 import OrderService from '../../services/OrderService';
 import { userService } from '../../services/UserService';
 import shippingService from '../../services/ShippingService';
+import paymentService from '../../services/PaymentService';
 import styles from './Checkout.module.scss';
 
 function Checkout() {
@@ -85,7 +86,6 @@ function Checkout() {
 
     const hasItems = items.length > 0;
 
-    // Tạm tính tổng tiền hàng (VNĐ)
     const subtotal = useMemo(
         () => items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0),
         [items]
@@ -158,13 +158,11 @@ function Checkout() {
                 };
 
                 const res = await shippingService.calculateFee(reqData);
-                console.log("Dữ liệu API phí ship trả về:", res);
-
                 const fee = res?.shippingFee ?? res?.data?.total ?? res?.data ?? 0;
                 setShippingFee(Number(fee));
 
             } catch (error) {
-                console.error("Lỗi tính phí vận chuyển:", error);
+                console.error(error);
                 setShippingFee(35000);
             } finally {
                 setIsCalculatingFee(false);
@@ -198,29 +196,45 @@ function Checkout() {
             quantity: item.quantity || 1
         }));
 
-        const hasMissingVariant = orderItems.some(item => !item.productVariantId);
-        if (hasMissingVariant) {
-            alert('Một hoặc nhiều sản phẩm trong giỏ thiếu thông tin variant.');
-            return;
-        }
-
         const orderData = {
             userId,
             shippingName: formData.fullName,
             shippingPhone: formData.phone,
             shippingAddress,
+            provinceId: Number(locationIds.province),
+            districtId: Number(locationIds.district),
+            wardCode: locationIds.ward,
             notes: formData.note || '',
             discountAmount: discount,
             shippingFee: shippingFee,
+            paymentMethod: paymentMethod.toUpperCase(),
             orderItems
         };
 
         setIsSubmitting(true);
         try {
+            // LUÔN TẠO ĐƠN HÀNG TRƯỚC (Dù là COD hay VNPay)
             const createdOrder = await OrderService.createOrder(orderData);
+
+            // Tạo đơn xong thì clear giỏ hàng luôn
             CartService.clearCart();
             setItems([]);
-            alert(`Đặt hàng thành công! Mã đơn hàng: ${createdOrder.orderCode}`);
+            window.dispatchEvent(new Event('cartUpdated'));
+
+            if (paymentMethod === 'vnpay') {
+                // Dùng chính orderCode vừa tạo để gọi link VNPay
+                const res = await paymentService.getVNPayUrl(total, createdOrder.orderCode);
+
+                if (res && res.paymentUrl) {
+                    window.location.href = res.paymentUrl;
+                } else {
+                    alert("Không thể khởi tạo đường dẫn thanh toán VNPay.");
+                }
+            } else {
+                // Nếu là COD thì chuyển qua trang thành công hoặc báo alert
+                alert(`Đặt hàng thành công! Mã đơn hàng: ${createdOrder.orderCode || createdOrder.id}`);
+                // navigate(`/order-success?orderCode=${createdOrder.orderCode}`);
+            }
         } catch (error) {
             const message = error?.response?.data || error?.message || 'Đặt hàng thất bại. Vui lòng thử lại.';
             alert(message);
@@ -232,7 +246,6 @@ function Checkout() {
     return (
         <main className={styles['checkout-main']}>
             <h1 className={styles['checkout-title']}>Thanh toán</h1>
-
             <div className={styles['checkout-grid']}>
                 <div className={styles['left-column']}>
                     <section className={styles['form-section']}>
@@ -242,12 +255,10 @@ function Checkout() {
                                 <label htmlFor="fullName">Họ và tên</label>
                                 <input type="text" id="fullName" placeholder="Nguyễn Văn A" value={formData.fullName} onChange={handleInputChange} />
                             </div>
-
                             <div className={styles['input-group']}>
                                 <label htmlFor="phone">Số điện thoại</label>
                                 <input type="tel" id="phone" placeholder="+84 900 000 000" value={formData.phone} onChange={handleInputChange} />
                             </div>
-
                             <div className={styles['grid-3-col']}>
                                 <div className={styles['input-group']}>
                                     <label htmlFor="province">Tỉnh / Thành phố</label>
@@ -261,7 +272,6 @@ function Checkout() {
                                         <span className={`material-symbols-outlined ${styles['dropdown-icon']}`}>expand_more</span>
                                     </div>
                                 </div>
-
                                 <div className={styles['input-group']}>
                                     <label htmlFor="district">Quận / Huyện</label>
                                     <div className={styles['select-wrapper']}>
@@ -274,7 +284,6 @@ function Checkout() {
                                         <span className={`material-symbols-outlined ${styles['dropdown-icon']}`}>expand_more</span>
                                     </div>
                                 </div>
-
                                 <div className={styles['input-group']}>
                                     <label htmlFor="ward">Phường / Xã</label>
                                     <div className={styles['select-wrapper']}>
@@ -288,19 +297,16 @@ function Checkout() {
                                     </div>
                                 </div>
                             </div>
-
                             <div className={styles['input-group']}>
                                 <label htmlFor="address">Địa chỉ chi tiết</label>
                                 <input type="text" id="address" placeholder="Số nhà, tên đường..." value={formData.address} onChange={handleInputChange} />
                             </div>
-
                             <div className={styles['input-group']}>
                                 <label htmlFor="note">Ghi chú đơn hàng</label>
                                 <textarea id="note" rows="3" placeholder="Lời nhắn cho shipper..." value={formData.note} onChange={handleInputChange}></textarea>
                             </div>
                         </form>
                     </section>
-
                     <section className={styles['form-section']}>
                         <h2 className={styles['section-title']}>Phương thức thanh toán</h2>
                         <div className={styles['payment-options']}>
@@ -311,7 +317,6 @@ function Checkout() {
                                     <span className="material-symbols-outlined">local_shipping</span>
                                 </div>
                             </label>
-
                             <label className={`${styles['payment-label']} ${paymentMethod === 'vnpay' ? styles.active : ''}`}>
                                 <input type="radio" name="payment" checked={paymentMethod === 'vnpay'} onChange={() => setPaymentMethod('vnpay')} />
                                 <div className={styles['payment-info']}>
@@ -322,11 +327,9 @@ function Checkout() {
                         </div>
                     </section>
                 </div>
-
                 <aside className={styles['right-column']}>
                     <div className={styles['summary-sticky']}>
                         <h2 className={styles['summary-title']}>Tóm tắt đơn hàng</h2>
-
                         <div className={styles['items-preview']}>
                             {hasItems ? (
                                 items.map((item) => (
@@ -350,7 +353,6 @@ function Checkout() {
                                 </div>
                             )}
                         </div>
-
                         <div className={styles['total-lines']}>
                             <div className={styles.line}><span>Tạm tính</span><span>{formatCurrency(subtotal)} đ</span></div>
                             {discount > 0 && (
@@ -366,13 +368,11 @@ function Checkout() {
                                             : (shippingFee === 0 ? <span className={styles.free}>Miễn phí</span> : `${formatCurrency(shippingFee)} đ`))}
                                 </span>
                             </div>
-
                             <div className={`${styles.line} ${styles.total}`}><span>Tổng cộng</span><span>{formatCurrency(total)} đ</span></div>
                         </div>
-
                         <button className={styles['btn-complete']} onClick={handleCompletePurchase} disabled={isSubmitting || isCalculatingFee}>
                             <span className="material-symbols-outlined">shopping_bag</span>
-                            {isSubmitting ? 'Đang xử lý...' : 'Hoàn tất đặt hàng'}
+                            {isSubmitting ? 'Đang xử lý...' : (paymentMethod === 'vnpay' ? 'Thanh toán qua VNPay' : 'Hoàn tất đặt hàng')}
                         </button>
                         <p className={styles['terms-text']}>Bằng việc hoàn tất, bạn đồng ý với Điều khoản dịch vụ.</p>
                     </div>
