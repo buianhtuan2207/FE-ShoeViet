@@ -1,16 +1,15 @@
-/* AdminSidebar.module.scss */
-
 .sidebar {
   position: fixed;
   left: 0;
   top: 0;
-  height: 100%;
+  height: 100vh;
+  box-sizing: border-box;
   width: 260px;
   background-color: var(--surface-container-lowest, #ffffff);
   border-right: 1px solid var(--outline-variant, #cac4d0);
   display: flex;
   flex-direction: column;
-  padding: 24px 0;
+  padding: 24px 0 16px 0;
   z-index: 50;
 }
 
@@ -38,6 +37,8 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow-y: auto;
+  margin-bottom: 16px;
 }
 
 .navItem {
@@ -57,7 +58,7 @@
 
 .activeNavItem {
   border-left: 4px solid var(--primary, #6750a4);
-  background-color: rgba(103, 80, 164, 0.1); /* primary-container/10 */
+  background-color: rgba(103, 80, 164, 0.1);
   color: var(--primary, #6750a4);
   transform: scale(0.98);
   font-weight: 700;
@@ -87,12 +88,11 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 
   &:hover {
-    background-color: rgba(179, 38, 30, 0.1); /* error-container/10 */
+    background-color: rgba(179, 38, 30, 0.1);
     color: var(--error, #b3261e);
   }
 }
 
 .icon {
-  /* Class dùng chung để căn chỉnh các icon nếu cần */
   display: inline-flex;
 }

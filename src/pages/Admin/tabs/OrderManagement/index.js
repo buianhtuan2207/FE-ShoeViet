@@ -1,79 +1,80 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './OrderManagement.module.scss';
-
-// Mảng cấu trúc dữ liệu cho khối Bento Thống kê tổng quan
-const statsBentoData = [
-    { id: 'pending', label: 'Đang chờ', value: '24', icon: 'pending_actions', trendText: '+12% hôm nay', trendType: 'positive' },
-    { id: 'confirmed', label: 'Đã xác nhận', value: '156', icon: 'verified', trendText: 'Đã được duyệt', trendType: 'neutral' },
-    { id: 'shipping', label: 'Đang giao', value: '89', icon: 'local_shipping', trendText: 'Vận chuyển nhanh', trendType: 'neutral' },
-    { id: 'completed', label: 'Hoàn tất', value: '1,204', icon: 'check_circle', trendText: '+5% tuần này', trendType: 'positive' },
-    { id: 'cancelled', label: 'Đã hủy', value: '12', icon: 'cancel', trendText: '-2% so với tháng trước', trendType: 'negative' }
-];
-
-// Mảng cấu trúc dữ liệu cho danh sách bảng đơn hàng
-const ordersData = [
-    {
-        id: '#SK-9421',
-        customerName: 'Nguyễn Văn An',
-        customerEmail: 'an.nguyen@email.com',
-        dateTime: '14/10/2023 09:24',
-        totalPrice: '2.450.000₫',
-        paymentMethod: 'Chuyển khoản',
-        statusText: 'Đang chờ',
-        statusKey: 'pending',
-        isZebra: false
-    },
-    {
-        id: '#SK-9420',
-        customerName: 'Trần Thị Mai',
-        customerEmail: 'mai.tran@gmail.com',
-        dateTime: '13/10/2023 21:15',
-        totalPrice: '4.890.000₫',
-        paymentMethod: 'COD',
-        statusText: 'Đã xác nhận',
-        statusKey: 'confirmed',
-        isZebra: true
-    },
-    {
-        id: '#SK-9419',
-        customerName: 'Lê Hoàng Nam',
-        customerEmail: 'nam.lh@outlook.com',
-        dateTime: '13/10/2023 18:30',
-        totalPrice: '1.200.000₫',
-        paymentMethod: 'Ví điện tử',
-        statusText: 'Đang giao',
-        statusKey: 'shipping',
-        isZebra: false
-    },
-    {
-        id: '#SK-9418',
-        customerName: 'Phạm Minh Tuấn',
-        customerEmail: 'tuantm@company.com',
-        dateTime: '13/10/2023 16:02',
-        totalPrice: '7.500.000₫',
-        paymentMethod: 'Chuyển khoản',
-        statusText: 'Hoàn tất',
-        statusKey: 'completed',
-        isZebra: true
-    },
-    {
-        id: '#SK-9417',
-        customerName: 'Đặng Bảo Ngọc',
-        customerEmail: 'ngoc.db@domain.vn',
-        dateTime: '13/10/2023 14:45',
-        totalPrice: '3.150.000₫',
-        paymentMethod: 'Ví điện tử',
-        statusText: 'Đã hủy',
-        statusKey: 'cancelled',
-        isZebra: false
-    }
-];
+import OrderService from '../../../../services/OrderService';
 
 function OrderManagement() {
+    const [orders, setOrders] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // State để lưu trữ bộ lọc trạng thái hiện tại
+    const [filterStatus, setFilterStatus] = useState('all');
+
+    // Gọi API lấy danh sách đơn hàng
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                setIsLoading(true);
+                const data = await OrderService.getAllOrders();
+                setOrders(data);
+            } catch (error) {
+                console.error("Lỗi khi tải danh sách đơn hàng:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchOrders();
+    }, []);
+
+    // 1. Hàm map trạng thái từ Backend sang UI
+    const getStatusUI = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'pending': return { text: 'Đang chờ', key: 'pending' };
+            case 'confirmed': return { text: 'Đã xác nhận', key: 'confirmed' };
+            case 'shipping': case 'shipped': return { text: 'Đang giao', key: 'shipping' };
+            case 'completed': case 'delivered': return { text: 'Hoàn tất', key: 'completed' };
+            case 'cancelled': return { text: 'Đã hủy', key: 'cancelled' };
+            default: return { text: status || 'Không rõ', key: 'pending' };
+        }
+    };
+
+    // 2. Tính toán linh động dữ liệu cho khối Bento Thống kê dựa trên mảng orders
+    const statsCount = { pending: 0, confirmed: 0, shipping: 0, completed: 0, cancelled: 0 };
+    orders.forEach(order => {
+        const key = getStatusUI(order.status).key;
+        if (statsCount[key] !== undefined) statsCount[key]++;
+    });
+
+    const dynamicStatsBentoData = [
+        { id: 'pending', label: 'Đang chờ', value: statsCount.pending, icon: 'pending_actions', trendText: 'Cần xử lý', trendType: 'neutral' },
+        { id: 'confirmed', label: 'Đã xác nhận', value: statsCount.confirmed, icon: 'verified', trendText: 'Đã duyệt', trendType: 'positive' },
+        { id: 'shipping', label: 'Đang giao', value: statsCount.shipping, icon: 'local_shipping', trendText: 'Đang vận chuyển', trendType: 'neutral' },
+        { id: 'completed', label: 'Hoàn tất', value: statsCount.completed, icon: 'check_circle', trendText: 'Thành công', trendType: 'positive' },
+        { id: 'cancelled', label: 'Đã hủy', value: statsCount.cancelled, icon: 'cancel', trendText: 'Khách hủy', trendType: 'negative' }
+    ];
+
+    // 3. Lọc mảng orders dựa trên trạng thái đã chọn
+    const filteredOrders = orders.filter(order => {
+        if (filterStatus === 'all') return true;
+        return getStatusUI(order.status).key === filterStatus;
+    });
+
+    // Hàm định dạng tiền tệ và ngày tháng
+    const formatCurrency = (amount) => {
+        if (amount == null) return '0₫';
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleString('vi-VN', {
+            hour: '2-digit', minute: '2-digit',
+            day: '2-digit', month: '2-digit', year: 'numeric'
+        });
+    };
+
     return (
         <main className={styles.main}>
-
-            {/* 2. Page Content */}
             <div className={styles.pageContent}>
                 <div className={styles.innerContainer}>
 
@@ -89,45 +90,51 @@ function OrderManagement() {
                         </button>
                     </div>
 
-                    {/* 3. Stats Bento Grid */}
+                    {/* Stats Bento Grid - CÓ THỂ BẤM ĐỂ LỌC */}
                     <div className={styles.statsBentoGrid}>
-                        {statsBentoData.map((stat) => (
-                            <div key={stat.id} className={styles.statCard}>
+                        {dynamicStatsBentoData.map((stat) => (
+                            <div
+                                key={stat.id}
+                                className={`${styles.statCard} ${filterStatus === stat.id ? styles.activeFilter : ''}`}
+                                onClick={() => setFilterStatus(filterStatus === stat.id ? 'all' : stat.id)} // Bấm lại sẽ hủy lọc
+                                style={{ cursor: 'pointer' }}
+                                title="Nhấn để lọc đơn hàng"
+                            >
                                 <div className={styles.statCardHeader}>
                                     <span className={styles.statLabel}>{stat.label}</span>
                                     <span className={`material-symbols-outlined ${styles.statIcon} ${styles[stat.id]}`}>
-                    {stat.icon}
-                  </span>
+                                        {stat.icon}
+                                    </span>
                                 </div>
                                 <h3 className={styles.statValue}>{stat.value}</h3>
                                 <div className={`${styles.statTrend} ${styles[stat.trendType]}`}>
-                                    {stat.trendType === 'positive' && (
-                                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>trending_up</span>
-                                    )}
-                                    {stat.trendType === 'negative' && (
-                                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>trending_down</span>
-                                    )}
+                                    {stat.trendType === 'positive' && <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>trending_up</span>}
+                                    {stat.trendType === 'negative' && <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>trending_down</span>}
                                     {stat.trendText}
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    {/* 4. Filters and Table Area Container */}
+                    {/* Filters and Table Area Container */}
                     <div className={styles.tableContainerCard}>
-
                         {/* Filters Header */}
                         <div className={styles.filtersHeader}>
                             <div className={styles.filterControlsLeft}>
                                 <div className={styles.selectGroupBlock}>
                                     <span className={styles.filterMetaLabel}>Trạng thái:</span>
-                                    <select className={styles.selectDropdown} defaultValue="Tất cả trạng thái">
-                                        <option>Tất cả trạng thái</option>
-                                        <option>Đang chờ</option>
-                                        <option>Đã xác nhận</option>
-                                        <option>Đang giao</option>
-                                        <option>Hoàn tất</option>
-                                        <option>Đã hủy</option>
+                                    {/* Liên kết value của thẻ select với state filterStatus */}
+                                    <select
+                                        className={styles.selectDropdown}
+                                        value={filterStatus}
+                                        onChange={(e) => setFilterStatus(e.target.value)}
+                                    >
+                                        <option value="all">Tất cả trạng thái</option>
+                                        <option value="pending">Đang chờ</option>
+                                        <option value="confirmed">Đã xác nhận</option>
+                                        <option value="shipping">Đang giao</option>
+                                        <option value="completed">Hoàn tất</option>
+                                        <option value="cancelled">Đã hủy</option>
                                     </select>
                                 </div>
 
@@ -164,53 +171,74 @@ function OrderManagement() {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {ordersData.map((order, idx) => (
-                                    <tr key={idx} className={`${styles.tr} ${order.isZebra ? styles.zebraRow : ''}`}>
-                                        <td className={`${styles.td} ${styles.orderId}`}>{order.id}</td>
-                                        <td className={styles.td}>
-                                            <div className={styles.customerBox}>
-                                                <span className={styles.customerName}>{order.customerName}</span>
-                                                <span className={styles.customerEmail}>{order.customerEmail}</span>
-                                            </div>
-                                        </td>
-                                        <td className={`${styles.td} ${styles.dateTimeText}`}>{order.dateTime}</td>
-                                        <td className={`${styles.td} ${styles.totalPrice}`}>{order.totalPrice}</td>
-                                        <td className={styles.td}>
-                                            <span className={styles.paymentBadge}>{order.paymentMethod}</span>
-                                        </td>
-                                        <td className={styles.td}>
-                        <span className={`${styles.statusBadge} ${styles[order.statusKey]}`}>
-                          {order.statusText}
-                        </span>
-                                        </td>
-                                        <td className={`${styles.td} ${styles.textRight}`}>
-                                            <div className={styles.rowActions}>
-                                                <button className={styles.actionRowBtn} title="Chi tiết">
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>visibility</span>
-                                                </button>
-                                                <button className={`${styles.actionRowBtn} ${styles.moreBtn}`} title="Thêm">
-                                                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>more_vert</span>
-                                                </button>
-                                            </div>
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                                            Đang tải dữ liệu đơn hàng...
                                         </td>
                                     </tr>
-                                ))}
+                                ) : filteredOrders.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                                            Không tìm thấy đơn hàng nào ở trạng thái này.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    // SỬ DỤNG MẢNG ĐÃ LỌC (filteredOrders) THAY VÌ TẤT CẢ (orders)
+                                    filteredOrders.map((order, idx) => {
+                                        const statusUI = getStatusUI(order.status);
+                                        const isZebra = idx % 2 !== 0;
+
+                                        return (
+                                            <tr key={order.id || idx} className={`${styles.tr} ${isZebra ? styles.zebraRow : ''}`}>
+                                                <td className={`${styles.td} ${styles.orderId}`}>{order.orderCode}</td>
+                                                <td className={styles.td}>
+                                                    <div className={styles.customerBox}>
+                                                        <span className={styles.customerName}>{order.shippingName}</span>
+                                                        <span className={styles.customerEmail}>{order.shippingPhone}</span>
+                                                    </div>
+                                                </td>
+                                                <td className={`${styles.td} ${styles.dateTimeText}`}>{formatDate(order.createdAt)}</td>
+                                                <td className={`${styles.td} ${styles.totalPrice}`}>{formatCurrency(order.finalAmount)}</td>
+                                                <td className={styles.td}>
+                                                    {/* HIỂN THỊ CHỮ COD */}
+                                                    <span className={styles.paymentBadge}>
+                                                        {(order.paymentMethod === 'COD' || order.paymentMethod?.toLowerCase() === 'thanh toán khi nhận hàng')
+                                                            ? 'COD'
+                                                            : order.paymentMethod}
+                                                    </span>
+                                                </td>
+                                                <td className={styles.td}>
+                                                    <span className={`${styles.statusBadge} ${styles[statusUI.key]}`}>
+                                                        {statusUI.text}
+                                                    </span>
+                                                </td>
+                                                <td className={`${styles.td} ${styles.textRight}`}>
+                                                    <div className={styles.rowActions}>
+                                                        <button className={styles.actionRowBtn} title="Chi tiết">
+                                                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>visibility</span>
+                                                        </button>
+                                                        <button className={`${styles.actionRowBtn} ${styles.moreBtn}`} title="Thêm thao tác">
+                                                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>more_vert</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
                                 </tbody>
                             </table>
                         </div>
 
                         {/* Pagination Footer */}
                         <div className={styles.pagination}>
-                            <span className={styles.paginationInfoText}>Hiển thị 1-10 trên 1,485 đơn hàng</span>
+                            <span className={styles.paginationInfoText}>Hiển thị {filteredOrders.length} đơn hàng</span>
                             <div className={styles.paginationControls}>
                                 <button className={styles.pageNavBtn} disabled>
                                     <span className="material-symbols-outlined">chevron_left</span>
                                 </button>
                                 <button className={`${styles.pageNumberBtn} ${styles.active}`}>1</button>
-                                <button className={styles.pageNumberBtn}>2</button>
-                                <button className={styles.pageNumberBtn}>3</button>
-                                <span className={styles.ellipsis}>...</span>
-                                <button className={styles.pageNumberBtn}>149</button>
                                 <button className={styles.pageNavBtn}>
                                     <span className="material-symbols-outlined">chevron_right</span>
                                 </button>
@@ -218,39 +246,6 @@ function OrderManagement() {
                         </div>
 
                     </div>
-
-                    {/* 5. Footer Summary Info (Asymmetric Layout element) */}
-                    <div className={styles.footerSummaryGrid}>
-                        <div className={styles.performanceSummaryBox}>
-                            <div className={styles.analyticsIconWrapper}>
-                                <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>analytics</span>
-                            </div>
-                            <div className={styles.perfContent}>
-                                <h3 className={styles.perfTitle}>Tóm tắt hiệu suất hôm nay</h3>
-                                <p className={styles.perfDescription}>
-                                    Tỷ lệ chuyển đổi đơn hàng tăng 4.2% so với hôm qua. Thời gian xử lý trung bình hiện tại là 1.2 giờ/đơn.
-                                </p>
-                                <div className={styles.perfTagsGroup}>
-                                    <div className={styles.perfTagItem}>
-                                        <div className={`${styles.dotIndicator} ${styles.primary}`}></div>
-                                        <span>Đã duyệt: 82%</span>
-                                    </div>
-                                    <div className={styles.perfTagItem}>
-                                        <div className={`${styles.dotIndicator} ${styles.amber}`}></div>
-                                        <span>Chờ xử lý: 18%</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={styles.alertNotificationCard}>
-                            <h3 className={styles.alertCardTitle}>Thông báo mới</h3>
-                            <p className={styles.alertCardText}>Có 5 đơn hàng giá trị cao đang chờ xác nhận thủ công.</p>
-                            <button className={styles.checkNowBtn}>Kiểm tra ngay</button>
-                            <span className={`${styles.bgDecorativeIcon} material-symbols-outlined`}>priority_high</span>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </main>
