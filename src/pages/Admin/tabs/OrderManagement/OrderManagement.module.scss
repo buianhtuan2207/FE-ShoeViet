@@ -727,3 +727,149 @@ $status-cancelled-bg: #fee2e2;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
 }
+
+.loadingState,
+.emptyState {
+  padding: 32px 24px;
+  text-align: center;
+  color: $text-muted;
+  font-size: 14px;
+}
+
+.orderCodeBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  small {
+    color: $text-muted;
+    font-size: 12px;
+  }
+}
+
+.statusSelect {
+  display: block;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: $text-main;
+  background-color: $surface;
+  margin-bottom: 8px;
+  min-width: 132px;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 60;
+}
+
+.modalContent {
+  width: min(720px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: $surface;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 20px;
+  color: $text-main;
+}
+
+.modalSubtitle {
+  margin: 4px 0 0;
+  color: $text-muted;
+  font-size: 13px;
+}
+
+.closeBtn {
+  border: none;
+  background: #f1f5f9;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: $text-main;
+}
+
+.detailGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.detailCard {
+  background: #f8fafc;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    color: $text-main;
+  }
+
+  p {
+    margin: 6px 0;
+    font-size: 14px;
+    color: $text-muted;
+  }
+}
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba($border-color, 0.7);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.itemMeta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: $text-muted;
+}
+
+.itemPrice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  color: $text-main;
+  font-size: 13px;
+}
