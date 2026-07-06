@@ -8,23 +8,25 @@ function OrderDetail() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [canceling, setCanceling] = useState(false);
+  const [actionMessage, setActionMessage] = useState('');
+
+  const loadOrder = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await OrderService.getOrderById(id);
+      setOrder(data);
+    } catch (err) {
+      console.error(err);
+      setError(err?.response?.data || err.message || 'Không thể tải đơn hàng.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const data = await OrderService.getOrderById(id);
-        setOrder(data);
-      } catch (err) {
-        console.error(err);
-        setError(err?.response?.data || err.message || 'Không thể tải đơn hàng.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) load();
+    if (id) loadOrder();
   }, [id]);
 
   const formatDate = (dateString) => {
@@ -38,7 +40,29 @@ function OrderDetail() {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
+  const normalizeStatus = (value) => (value || '').toString().trim().toLowerCase();
+  const isPending = normalizeStatus(order?.status) === 'pending';
   const items = order?.items || order?.orderItems || [];
+
+  const handleCancelOrder = async () => {
+    if (!order?.id) return;
+
+    const confirmed = window.confirm('Bạn có chắc muốn hủy đơn hàng này không?');
+    if (!confirmed) return;
+
+    setCanceling(true);
+    setActionMessage('');
+    try {
+      const updatedOrder = await OrderService.cancelOrder(order.id);
+      setOrder(updatedOrder);
+      setActionMessage('Đơn hàng đã được hủy thành công.');
+    } catch (err) {
+      console.error(err);
+      setActionMessage(err?.response?.data || err.message || 'Không thể hủy đơn hàng.');
+    } finally {
+      setCanceling(false);
+    }
+  };
 
   return (
     <main className={styles.mainContainer}>
@@ -47,6 +71,12 @@ function OrderDetail() {
           <h1 className={styles.title}>Chi tiết đơn hàng</h1>
           <p className={styles.subtitle}>Xem chi tiết đơn hàng của bạn</p>
         </header>
+
+        {actionMessage && (
+          <div className={`${styles.message} ${actionMessage.includes('thành công') ? styles.success : styles.error}`}>
+            {actionMessage}
+          </div>
+        )}
 
         {loading ? (
           <div className={styles.emptyState}>Đang tải đơn hàng...</div>
@@ -61,6 +91,21 @@ function OrderDetail() {
               <div><strong>Trạng thái:</strong> {order.status || '-'}</div>
               <div><strong>Ngày đặt:</strong> {formatDate(order.createdAt || order.created_at)}</div>
               <div><strong>Tổng:</strong> {formatMoney(order.finalAmount ?? order.totalAmount)}</div>
+            </div>
+
+            <div className={styles.customerCard}>
+              <h2 className={styles.customerTitle}>Thông tin người nhận</h2>
+              <div className={styles.customerGrid}>
+                <div><strong>Họ tên:</strong> {order.shippingName || '—'}</div>
+                <div><strong>Số điện thoại:</strong> {order.shippingPhone || '—'}</div>
+                <div><strong>Địa chỉ:</strong> {order.shippingAddress || '—'}</div>
+                <div><strong>Ghi chú:</strong> {order.notes || 'Không có'}</div>
+              </div>
+              {isPending && (
+                <button className={styles.cancelButton} onClick={handleCancelOrder} disabled={canceling}>
+                  {canceling ? 'Đang xử lý...' : 'Hủy đơn hàng'}
+                </button>
+              )}
             </div>
 
             <div className={styles.itemsList}>
