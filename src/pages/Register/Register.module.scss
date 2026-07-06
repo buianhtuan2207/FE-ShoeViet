@@ -1,64 +1,58 @@
-// register.module.scss
 
-// Variables (Tùy chỉnh theo theme của bạn)
-$primary-color: #000000;
-$surface-color: #f8f9fa;
-$surface-container: #ffffff;
-$text-primary: #111827;
-$text-secondary: #6b7280;
-$border-color: #e5e7eb;
-$border-focus: #3b82f6;
+$primary-color: #2563eb;
+$primary-hover: #1d4ed8;
+$text-main: #111827;
+$text-muted: #6b7280;
+$border-color: #d1d5db;
+$bg-color: #f9fafb;
 
 .mainContainer {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6rem 1.5rem 3rem;
-  background-color: $surface-color;
+  background-color: $bg-color;
+  padding: 0.5rem;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .card {
   width: 100%;
-  max-width: 36rem;
-  background-color: $surface-container;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+  max-width: 520px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .formPanel {
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  @media (min-width: 1024px) {
-    padding: 3rem;
-  }
+  padding: 2.5rem 2rem;
 }
 
 .header {
-  margin-bottom: 2.5rem;
   text-align: center;
+  margin-bottom: 2rem;
 
   .title {
-    font-size: 1.875rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    color: $primary-color;
-    margin-bottom: 0.5rem;
+    color: $text-main;
+    margin: 0 0 0.5rem 0;
   }
 
   .subtitle {
-    color: $text-secondary;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    color: $text-muted;
+    margin: 0;
   }
 }
 
+/* =========================================
+   Form & Inputs
+   ========================================= */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .inputGroup {
@@ -68,100 +62,110 @@ $border-focus: #3b82f6;
 }
 
 .inputWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
   label {
-    display: block;
     font-size: 0.875rem;
-    color: $text-secondary;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-weight: 500;
+    color: #374151;
     margin-bottom: 0.5rem;
-    font-weight: 600;
   }
 
-  input {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"] {
     width: 100%;
-    padding: 0.75rem 1rem;
-    background-color: #f9fafb;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.95rem;
+    color: $text-main;
+    background-color: #ffffff;
     border: 1px solid $border-color;
-    border-radius: 0.5rem;
+    border-radius: 8px;
     outline: none;
-    transition: all 0.2s;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+
+    &::placeholder {
+      color: #9ca3af;
+    }
 
     &:focus {
-      box-shadow: 0 0 0 2px $primary-color;
-      border-color: transparent;
-    }
-
-    // 🔥 ĐOẠN QUAN TRỌNG: Ẩn hoàn toàn icon mắt mặc định của trình duyệt gõ mật khẩu
-    &::-ms-reveal,
-    &::-ms-clear {
-      display: none;
-      width: 0;
-      height: 0;
-    }
-  }
-
-  .passwordField {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-
-    input {
-      padding-right: 3rem; // Chừa khoảng trống bên phải để text không đè lên con mắt custom
-    }
-
-    .eyeBtn {
-      position: absolute;
-      right: 1rem;
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: $text-secondary;
-      transition: color 0.2s;
-
-      &:hover {
-        color: $primary-color;
-      }
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
   }
 }
 
+/* Nhóm Mật khẩu (Hiển thị 2 cột trên Desktop) */
 .passwordCluster {
   display: grid;
+  grid-template-columns: 1fr;
   gap: 1rem;
 
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
+  @media (min-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.passwordField {
+  position: relative;
+  width: 100%;
+
+  input {
+    padding-right: 2.75rem !important; /* Dành chỗ cho icon mắt */
+  }
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #9ca3af;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #4b5563;
+  }
+
+  &:focus {
+    outline: none;
   }
 }
 
 .termsWrapper {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 
   input[type="checkbox"] {
-    margin-top: 0.25rem;
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 0.25rem;
-    border: 1px solid $border-color;
+    margin-top: 0.15rem;
     cursor: pointer;
+    width: 16px;
+    height: 16px;
+    accent-color: $primary-color;
   }
 
   label {
-    font-size: 1rem;
-    color: $text-secondary;
+    font-size: 0.875rem;
+    color: $text-muted;
+    line-height: 1.4;
+    cursor: pointer;
 
     a {
       color: $primary-color;
-      font-weight: 700;
+      font-weight: 500;
       text-decoration: none;
 
       &:hover {
@@ -173,109 +177,101 @@ $border-focus: #3b82f6;
 
 .submitBtn {
   width: 100%;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   background-color: $primary-color;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 1.125rem;
+  color: #ffffff;
+  font-size: 1rem;
   font-weight: 600;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
 
-  &:active {
-    transform: scale(0.98);
+  &:hover:not(:disabled) {
+    background-color: $primary-hover;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    background-color: #93c5fd;
+    cursor: not-allowed;
+    opacity: 0.7;
   }
 }
 
 .divider {
-  position: relative;
-  padding: 1rem 0;
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
 
   .line {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-
-    div {
-      width: 100%;
-      border-top: 1px solid $border-color;
-    }
+    flex-grow: 1;
+    height: 1px;
+    background-color: #e5e7eb;
   }
 
   .textWrapper {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    font-size: 0.875rem;
+    padding: 0 1rem;
 
     span {
-      padding: 0 1rem;
-      background-color: $surface-container;
-      color: $text-secondary;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+      font-size: 0.875rem;
+      color: $text-muted;
+      background-color: #ffffff;
     }
   }
 }
 
 .socialGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
 
-  .socialBtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border: 1px solid $border-color;
-    border-radius: 0.5rem;
-    background-color: white;
-    cursor: pointer;
-    transition: all 0.2s;
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr;
+  }
+}
 
-    &:hover {
-      background-color: #f9fafb;
-      border-color: #d1d5db;
+.socialBtn {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #ffffff;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 
-      img, svg {
-        opacity: 1;
-      }
-    }
+  &:hover {
+    background-color: #f3f4f6;
+  }
 
-    &:active {
-      transform: scale(0.98);
-    }
-
-    img, svg {
-      opacity: 0.9;
-      transition: opacity 0.2s;
-    }
-
-    span {
-      font-weight: 500;
-      font-size: 0.875rem;
-      color: #3f3f46;
-    }
+  svg {
+    width: 20px;
+    height: 20px;
   }
 }
 
 .redirect {
-  margin-top: 2rem;
+  margin-top: 1rem;
   text-align: center;
 
   p {
-    font-size: 1rem;
-    color: $text-secondary;
+    font-size: 0.875rem;
+    color: $text-muted;
+    margin: 0;
 
     a {
       color: $primary-color;
-      font-weight: 700;
       text-decoration: none;
+      font-weight: 600;
+      margin-left: 0.25rem;
 
       &:hover {
         text-decoration: underline;
