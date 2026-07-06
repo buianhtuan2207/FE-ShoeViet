@@ -1,169 +1,188 @@
-// Variables
-$primary: #000000;
-$on-primary: #ffffff;
-$surface-container-lowest: #ffffff;
-$surface: #f8f9fa;
-$text-secondary: #6b7280;
-$outline-variant: #d1d5db;
+/* =========================================
+   Biến màu sắc & Cấu hình cơ bản (Đồng bộ hệ thống)
+   ========================================= */
+$primary-color: #2563eb;
+$primary-hover: #1d4ed8;
+$text-main: #111827;
+$text-muted: #6b7280;
+$border-color: #d1d5db;
+$bg-color: #f9fafb;
 
 .mainContainer {
-  flex-grow: 1;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4rem 1.5rem; // py-section-gap px-gutter
-  width: 100%;
-  min-height: 100vh;
-  background-color: $surface;
+  background-color: $bg-color;
+  padding: 1.5rem;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .card {
   width: 100%;
-  max-width: 28rem; // max-w-md
-  background-color: $surface-container-lowest;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  @media (min-width: 768px) {
-    padding: 2.5rem; // md:p-10
-  }
+  max-width: 460px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
+/* =========================================
+   Header (Tiêu đề)
+   ========================================= */
 .header {
   text-align: center;
   margin-bottom: 2rem;
-  width: 100%;
 
   .title {
-    font-size: 1.75rem; // text-headline-md
+    font-size: 1.75rem;
     font-weight: 700;
-    color: $primary;
-    margin-bottom: 0.75rem;
+    color: $text-main;
+    margin: 0 0 0.5rem 0;
   }
 
   .subtitle {
-    font-size: 1rem;
-    color: $text-secondary;
+    font-size: 0.95rem;
+    color: $text-muted;
+    margin: 0;
+    line-height: 1.5;
   }
 }
 
+/* =========================================
+   Form & OTP Inputs Grid
+   ========================================= */
 .form {
-  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 1.5rem;
 }
 
 .otpGrid {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  gap: 0.5rem; // gap-2
-  margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+  justify-content: center;
+
+  @media (min-width: 400px) {
+    gap: 0.75rem;
+  }
 }
 
 .otpInput {
-  width: 3rem; // w-12
-  height: 3.5rem; // h-14
+  width: 100%;
+  height: 3.5rem; /* Tăng chiều cao để ô nhập số nhìn thoáng và dễ gõ */
   text-align: center;
   font-size: 1.5rem;
   font-weight: 700;
-  border-radius: 0.5rem;
-  border: 1px solid $outline-variant;
-  background-color: $surface;
-  color: $primary;
+  color: $text-main;
+  background-color: #ffffff;
+  border: 1px solid $border-color;
+  border-radius: 8px;
   outline: none;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
 
   &::placeholder {
-    color: $outline-variant;
+    color: #cbd5e1;
   }
 
   &:focus {
-    border-color: $primary;
-    background-color: $surface-container-lowest;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  &:disabled {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
   }
 }
 
+/* =========================================
+   Nút Xác nhận (Submit Button)
+   ========================================= */
 .submitBtn {
   width: 100%;
-  background-color: $primary;
-  color: $on-primary;
-  font-size: 1rem;
-  font-weight: 700;
-  padding: 1rem;
-  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: $primary-color;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 
-  &:hover {
-    opacity: 0.9;
+  &:hover:not(:disabled) {
+    background-color: $primary-hover;
+    transform: translateY(-1px);
   }
 
-  &:active {
-    transform: scale(0.98);
+  &:disabled {
+    background-color: #93c5fd;
+    cursor: not-allowed;
+    opacity: 0.7;
   }
 }
 
+/* =========================================
+   Hành động phụ (Gửi lại mã & Quay lại)
+   ========================================= */
 .secondaryActions {
-  text-align: center;
-  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; // gap-6
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
 }
 
 .resendBtn {
-  font-size: 1rem;
-  color: $text-secondary;
   background: transparent;
   border: none;
   padding: 0;
+  font-size: 0.875rem;
+  color: $text-muted;
   cursor: pointer;
-  transition: color 0.2s;
-
-  &:hover {
-    color: $primary;
-  }
+  font-weight: 500;
+  transition: color 0.2s ease;
 
   span {
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    color: $primary-color;
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 }
 
 .backLink {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
-  font-size: 1rem;
-  color: $text-secondary;
+  font-size: 0.875rem;
+  color: $text-muted;
   text-decoration: none;
-  transition: color 0.2s;
+  font-weight: 500;
+  transition: color 0.2s ease;
 
   &:hover {
-    color: $primary;
-
-    .arrowIcon {
-      transform: translateX(-4px); // group-hover:-translate-x-1
-    }
+    color: $primary-color;
   }
 
   .arrowIcon {
-    transition: transform 0.2s;
+    transition: transform 0.2s ease;
+  }
+
+  /* Hiệu ứng đẩy mũi tên sang trái nhẹ khi hover */
+  &:hover .arrowIcon {
+    transform: translateX(-4px);
   }
 }
