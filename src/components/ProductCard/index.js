@@ -1,19 +1,16 @@
-import React, { useEffect } from 'react'; // 🎯 XÓA BỎ useState vì không dùng nữa
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import favoriteService from '../../services/FavoriteService';
 import styles from './ProductCard.module.scss';
-import { useFavorites } from '../../context/FavoriteContext'; // <-- Kiểm tra lại đường dẫn import cho đúng
+import { useFavorites } from '../../context/FavoriteContext';
 
 const ProductCard = ({ data, isInitiallyLiked = false, onFavoriteToggle }) => {
     const id = data?.id;
 
-    // 1. LẤY DỮ LIỆU TỪ KHO CHUNG (CONTEXT) RA ĐÂY
     const { likedProductIds, setProductLikedStatus } = useFavorites();
 
-    // 2. BIẾN KIỂM TRA TRÁI TIM ĐỎ: Kiểm tra xem ID sản phẩm này có nằm trong mảng kho chung không
     const isLiked = likedProductIds.includes(id);
 
-    // 3. ĐỒNG BỘ BAN ĐẦU: Khi card load lần đầu, nếu BE báo đã thích, nạp ID này vào kho chung
     useEffect(() => {
         if (data?.isLiked || data?.liked || isInitiallyLiked) {
             setProductLikedStatus(id, true);
@@ -41,11 +38,8 @@ const ProductCard = ({ data, isInitiallyLiked = false, onFavoriteToggle }) => {
         try {
             const response = await favoriteService.toggleFavorite(id);
             if (response.success) {
-                // 4. CẬP NHẬT LÊN KHO CHUNG:
-                // Thay vì setIsLiked(response.isFavorite), ta bắn trạng thái mới lên Context
                 setProductLikedStatus(id, response.isFavorite);
 
-                // Sau đó thông báo lên component cha xử lý tiếp logic xóa phần tử khỏi grid (nếu ở trang Favorite)
                 if (onFavoriteToggle) {
                     onFavoriteToggle(id, response.isFavorite);
                 }
@@ -67,7 +61,6 @@ const ProductCard = ({ data, isInitiallyLiked = false, onFavoriteToggle }) => {
                 <img alt={name} src={img} className={styles['product-img']} />
 
                 <div className={styles['product-actions']}>
-                    {/* Giữ nguyên phần render này, class styles['liked'] sẽ tự động ăn theo biến isLiked lấy từ Context */}
                     <button
                         className={`${styles['action-btn']} ${styles['btn-favorite']} ${isLiked ? styles['liked'] : ''}`}
                         onClick={handleFavorite}

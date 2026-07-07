@@ -1,24 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from './ProductDetail.module.scss';
 import ProductCard from "../../components/ProductCard";
 import productService from '../../services/ProductService';
 import CartService from '../../services/CartService';
+import favoriteService from '../../services/FavoriteService';
+import { useFavorites } from '../../context/FavoriteContext';
 
 function ProductDetail() {
     const { id } = useParams();
 
-    // --- CÁC STATE QUẢN LÝ DỮ LIỆU API ---
     const [product, setProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // --- CÁC STATE ĐIỀU HƯỚNG GIAO DIỆN ---
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [selectedColor, setSelectedColor] = useState('');
     const [selectedSize, setSelectedSize] = useState('');
-    const [cartNotification, setCartNotification] = useState('');
+
+    const [toast, setToast] = useState({ message: '', show: false, type: '' });
+    const toastTimeoutRef = useRef(null);
+
+    const { likedProductIds, setProductLikedStatus } = useFavorites();
+    const isLiked = product ? likedProductIds.includes(product.id) : false;
+
+    useEffect(() => {
+        if (product && (product.isLiked || product.liked)) {
+            setProductLikedStatus(product.id, true);
+        }
+    }, [product, setProductLikedStatus]);
 
     useEffect(() => {
         const fetchProductDetail = async () => {
@@ -47,7 +58,7 @@ function ProductDetail() {
                     setRelatedProducts(filtered.slice(0, 4));
                 }
             } catch (err) {
-                console.error("Lỗi tải chi tiết sản phẩm:", err);
+                console.error(err);
                 setError("Không thể tải thông tin sản phẩm này.");
             } finally {
                 setLoading(false);
@@ -63,6 +74,30 @@ function ProductDetail() {
             style: 'currency',
             currency: 'VND'
         }).format(value);
+    };
+
+    const showToastNotification = (message, type = 'cart') => {
+        setToast({ message, show: true, type });
+        if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+        toastTimeoutRef.current = setTimeout(() => {
+            setToast(prev => ({ ...prev, show: false }));
+        }, 3000);
+    };
+
+    const handleFavoriteToggle = async () => {
+        if (!product) return;
+        try {
+            const response = await favoriteService.toggleFavorite(product.id);
+            if (response.success) {
+                setProductLikedStatus(product.id, response.isFavorite);
+                showToastNotification(
+                    response.isFavorite ? 'Đã thêm vào mục yêu thích' : 'Đã bỏ yêu thích',
+                    'favorite'
+                );
+            }
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     if (loading) return <div className="loading-box" style={{ textAlign: 'center', padding: '100px' }}>Đang tải thông tin sản phẩm...</div>;
@@ -101,13 +136,13 @@ function ProductDetail() {
         };
 
         CartService.addItem(cartItem);
-        setCartNotification('Đã thêm sản phẩm vào giỏ hàng.');
-        setTimeout(() => setCartNotification(''), 2500);
+        showToastNotification('Đã thêm sản phẩm vào giỏ hàng', 'cart');
     };
 
     const handleNextImage = () => {
         setCurrentImageIndex((prevIndex) => prevIndex === productImages.length - 1 ? 0 : prevIndex + 1);
     };
+
     const handlePrevImage = () => {
         setCurrentImageIndex((prevIndex) => prevIndex === 0 ? productImages.length - 1 : prevIndex - 1);
     };
@@ -125,7 +160,13 @@ function ProductDetail() {
 
     return (
         <main className={styles['product-detail-container']}>
-            {/* Breadcrumbs */}
+            <div className={`${styles['toast-notification']} ${toast.show ? styles.show : ''} ${toast.type === 'favorite' ? styles.favorite : ''}`}>
+                <span className="material-symbols-outlined">
+                    {toast.type === 'favorite' ? 'favorite' : 'check_circle'}
+                </span>
+                <span>{toast.message}</span>
+            </div>
+
             <nav aria-label="Breadcrumb" className={styles.breadcrumb}>
                 <ol className={styles['breadcrumb-list']}>
                     <li><a href="/">Home</a></li>
@@ -138,9 +179,7 @@ function ProductDetail() {
                 </ol>
             </nav>
 
-            {/* Product Hero Section */}
             <div className={styles['product-hero']}>
-                {/* Left Column: Gallery */}
                 <div className={styles['product-gallery']}>
                     <div className={`${styles['main-image-wrapper']} group relative`}>
                         {productImages.length > 1 && (
@@ -162,12 +201,21 @@ function ProductDetail() {
                         )}
 
                         <div className={`${styles.badge} ${styles['new-release']} absolute top-4 left-4`}>Mới ra mắt</div>
-                        <button className={`${styles['btn-favorite']} absolute top-4 right-4`} aria-label="Thêm vào mục yêu thích">
-                            <span className="material-symbols-outlined">favorite</span>
+
+                        <button
+                            className={`${styles['btn-favorite']} ${isLiked ? styles['liked'] : ''} absolute top-4 right-4`}
+                            aria-label="Thêm vào mục yêu thích"
+                            onClick={handleFavoriteToggle}
+                        >
+                            <span
+                                className="material-symbols-outlined"
+                                style={isLiked ? { fontVariationSettings: "'FILL' 1", color: '#dc2626' } : {}}
+                            >
+                                favorite
+                            </span>
                         </button>
                     </div>
 
-                    {/* Thumbnails */}
                     {productImages.length > 1 && (
                         <div className={styles['thumbnail-grid']}>
                             {productImages.map((imgSrc, index) => (
@@ -176,14 +224,13 @@ function ProductDetail() {
                                     className={`${styles['thumbnail-btn']} ${currentImageIndex === index ? styles.active : ''}`}
                                     onClick={() => setCurrentImageIndex(index)}
                                 >
-                                    <img alt={`Hình thu nhỏ ${index + 1}`} src={imgSrc} />
+                                    <img alt={`${index + 1}`} src={imgSrc} />
                                 </button>
                             ))}
                         </div>
                     )}
                 </div>
 
-                {/* Right Column: Product Info */}
                 <div className={styles['product-info-wrapper']}>
                     <div className={styles['product-info-sticky']}>
                         <div className={styles['title-price-group']}>
@@ -195,7 +242,6 @@ function ProductDetail() {
                             {product.description || "Sản phẩm chính hãng chất lượng cao, kiểu dáng thời thượng ôm chân, mang lại cảm giác thoải mái tối đa khi di chuyển."}
                         </p>
 
-                        {/* Chọn màu sắc */}
                         {uniqueColors.length > 0 && (
                             <div className={styles['selection-group']}>
                                 <div className={styles['selection-header']}>
@@ -226,7 +272,6 @@ function ProductDetail() {
                             </div>
                         )}
 
-                        {/* Chọn Kích cỡ */}
                         <div className={styles['selection-group']}>
                             <div className={styles['selection-header']}>
                                 <span className={styles['selection-label']}>Kích cỡ</span>
@@ -251,34 +296,31 @@ function ProductDetail() {
                             )}
                         </div>
 
-                        {/* CTA Buttons */}
                         <div className={styles['cta-group']}>
-                            <button
-                                className={styles['btn-add-to-cart']}
-                                disabled={!activeVariant || activeVariant.stockQuantity <= 0}
-                                style={{ opacity: (!activeVariant || activeVariant.stockQuantity <= 0) ? 0.6 : 1 }}
-                                onClick={handleAddToCart}
-                            >
-                                <span>{activeVariant?.stockQuantity > 0 ? 'Thêm vào giỏ hàng' : 'Tạm hết hàng'}</span>
-                                <span className="material-symbols-outlined">arrow_forward</span>
-                            </button>
-                            {cartNotification && (
-                                <div style={{ marginTop: '14px', color: '#047857', fontWeight: 600 }}>
-                                    {cartNotification}
-                                </div>
-                            )}
-                            <div className={styles['shipping-info']}>
-                                <span className="material-symbols-outlined icon-small">local_shipping</span>
-                                <span>Miễn phí vận chuyển cho đơn hàng trên 1.500.000 ₫</span>
+                            <div className={styles['cta-buttons-wrapper']}>
+                                <button
+                                    className={styles['btn-add-to-cart']}
+                                    disabled={!activeVariant || activeVariant.stockQuantity <= 0}
+                                    onClick={handleAddToCart}
+                                >
+                                    <span className="material-symbols-outlined">shopping_cart</span>
+                                    <span>{activeVariant?.stockQuantity > 0 ? 'Giỏ hàng' : 'Tạm hết hàng'}</span>
+                                </button>
+
+                                <button
+                                    className={`${styles['btn-wishlist']} ${isLiked ? styles['liked'] : ''}`}
+                                    onClick={handleFavoriteToggle}
+                                >
+                                    <span className="material-symbols-outlined">favorite</span>
+                                    <span>{isLiked ? 'Đã yêu thích' : 'Yêu thích'}</span>
+                                </button>
                             </div>
                             {activeVariant && <small style={{ color: '#888', display: 'block', marginTop: '6px' }}>Mã SKU: {activeVariant.sku}</small>}
                         </div>
-
                     </div>
                 </div>
             </div>
 
-            {/* Reviews Section */}
             <section className={styles['reviews-section']}>
                 <div className={styles['reviews-header']}>
                     <div className={styles['reviews-summary']}>
@@ -299,7 +341,6 @@ function ProductDetail() {
                 </div>
 
                 <div className={styles['reviews-grid']}>
-                    {/* Review Card 1 */}
                     <div className={styles['review-card']}>
                         <div className={styles['review-card-header']}>
                             <div className={`${styles.stars} ${styles.small}`}>
@@ -319,7 +360,6 @@ function ProductDetail() {
                         </div>
                     </div>
 
-                    {/* Review Card 2 */}
                     <div className={styles['review-card']}>
                         <div className={styles['review-card-header']}>
                             <div className={`${styles.stars} ${styles.small}`}>
@@ -339,7 +379,6 @@ function ProductDetail() {
                         </div>
                     </div>
 
-                    {/* Review Card 3 */}
                     <div className={`${styles['review-card']} ${styles['highlight-card']}`}>
                         <div className={styles['review-card-header']}>
                             <div className={`${styles.stars} ${styles.small}`}>
@@ -364,7 +403,6 @@ function ProductDetail() {
                 </div>
             </section>
 
-            {/* Related Products Section */}
             {relatedProducts.length > 0 && (
                 <section className={styles['related-section']}>
                     <h2 className={`${styles['section-title']} ${styles['mb-large']}`}>Sản phẩm liên quan</h2>
