@@ -86,6 +86,7 @@ const ProductCard = ({ data, isInitiallyLiked = false, onFavoriteToggle }) => {
         };
 
         CartService.addItem(cartItem);
+        window.dispatchEvent(new Event('cartChange'));
         showToastNotification('Đã thêm sản phẩm vào giỏ hàng', 'cart');
     };
 

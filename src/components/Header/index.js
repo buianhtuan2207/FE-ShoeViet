@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import brandService from '../../services/BrandService';
 import categoryService from '../../services/CategoryService';
 import searchService from '../../services/SearchService';
+import CartService from '../../services/CartService';
 import { useFavorites } from '../../context/FavoriteContext';
 
 import styles from './Header.module.scss';
@@ -22,6 +23,26 @@ function Header() {
     const [searchHistory, setSearchHistory] = useState([]);
     const searchInputRef = useRef(null);
     const suggestionsRef = useRef(null);
+
+    const [cartCount, setCartCount] = useState(0);
+
+    useEffect(() => {
+        const updateCartCount = () => {
+            const items = CartService.getCart ? CartService.getCart() : (JSON.parse(localStorage.getItem('cart')) || []);
+            const total = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+            setCartCount(total);
+        };
+
+        updateCartCount();
+
+        window.addEventListener('cartChange', updateCartCount);
+        window.addEventListener('storage', updateCartCount);
+
+        return () => {
+            window.removeEventListener('cartChange', updateCartCount);
+            window.removeEventListener('storage', updateCartCount);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchMenuData = async () => {
@@ -78,7 +99,6 @@ function Header() {
         const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
         setSearchHistory(history.slice(0, 5));
     }, []);
-
 
     useEffect(() => {
         const debounceTimer = setTimeout(async () => {
@@ -172,14 +192,11 @@ function Header() {
         <nav className={styles['header-nav']}>
             <div className={styles['header-container']}>
 
-                {/* 1. Logo */}
                 <Link className={styles['header-logo']} to="/">
                     SHOEVIET
                 </Link>
 
-                {/* 2. Menu Links */}
                 <div className={styles['header-links']}>
-                    {/*<Link className={styles['nav-link']} to="/">Trang chủ</Link>*/}
                     <Link className={styles['nav-link']} to="/about">Giới thiệu</Link>
 
                     <div className={styles['nav-item-dropdown']}>
@@ -220,7 +237,6 @@ function Header() {
                     </div>
                 </div>
 
-                {/* 3. Thanh tìm kiếm */}
                 <div className={styles['search-container']}>
                     <form onSubmit={handleSearchSubmit} className={styles['search-form']}>
                         <span className={`material-symbols-outlined ${styles['search-icon']}`}>search</span>
@@ -289,10 +305,12 @@ function Header() {
                     )}
                 </div>
 
-                {/* 4. Các nút Icon */}
                 <div className={styles['header-icons']}>
-                    <Link to="/cart" className={styles['action-button']}>
+                    <Link to="/cart" className={`${styles['action-button']} ${styles['cart-header-btn']}`}>
                         <span className="material-symbols-outlined">shopping_cart</span>
+                        {cartCount > 0 && (
+                            <span className={styles['cart-badge']}>{cartCount}</span>
+                        )}
                     </Link>
                     <Link to="/favorite" className={`${styles['action-button']} ${styles['favorite-header-btn']}`}>
                         <span className="material-symbols-outlined">
