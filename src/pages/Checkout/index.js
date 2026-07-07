@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CartService from '../../services/CartService';
 import OrderService from '../../services/OrderService';
 import { userService } from '../../services/UserService';
@@ -7,6 +8,7 @@ import paymentService from '../../services/PaymentService';
 import styles from './Checkout.module.scss';
 
 function Checkout() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         fullName: '',
         phone: '',
@@ -91,7 +93,7 @@ function Checkout() {
         [items]
     );
 
-    const discount = hasItems ? 25000 : 0;
+    const discount = 0;
     const total = Math.max(0, subtotal - discount + shippingFee);
 
     const formatCurrency = (value) => {
@@ -213,16 +215,13 @@ function Checkout() {
 
         setIsSubmitting(true);
         try {
-            // LUÔN TẠO ĐƠN HÀNG TRƯỚC (Dù là COD hay VNPay)
             const createdOrder = await OrderService.createOrder(orderData);
 
-            // Tạo đơn xong thì clear giỏ hàng luôn
             CartService.clearCart();
             setItems([]);
             window.dispatchEvent(new Event('cartUpdated'));
 
             if (paymentMethod === 'vnpay') {
-                // Dùng chính orderCode vừa tạo để gọi link VNPay
                 const res = await paymentService.getVNPayUrl(total, createdOrder.orderCode);
 
                 if (res && res.paymentUrl) {
@@ -231,9 +230,11 @@ function Checkout() {
                     alert("Không thể khởi tạo đường dẫn thanh toán VNPay.");
                 }
             } else {
-                // Nếu là COD thì chuyển qua trang thành công hoặc báo alert
-                alert(`Đặt hàng thành công! Mã đơn hàng: ${createdOrder.orderCode || createdOrder.id}`);
-                // navigate(`/order-success?orderCode=${createdOrder.orderCode}`);
+                navigate('/order-success', {
+                    state: {
+                        orderCode: createdOrder.orderCode || createdOrder.id
+                    }
+                });
             }
         } catch (error) {
             const message = error?.response?.data || error?.message || 'Đặt hàng thất bại. Vui lòng thử lại.';
@@ -355,9 +356,10 @@ function Checkout() {
                         </div>
                         <div className={styles['total-lines']}>
                             <div className={styles.line}><span>Tạm tính</span><span>{formatCurrency(subtotal)} đ</span></div>
-                            {discount > 0 && (
-                                <div className={styles.line}><span>Giảm giá</span><span>-{formatCurrency(discount)} đ</span></div>
-                            )}
+                            <div className={styles.line}>
+                                <span>Giảm giá</span>
+                                <span>{discount > 0 ? `-${formatCurrency(discount)} đ` : 'Không có'}</span>
+                            </div>
                             <div className={styles.line}>
                                 <span>Vận chuyển</span>
                                 <span>

@@ -26,8 +26,13 @@ function Cart() {
         }
     };
 
+    const formatVND = (amount) => {
+        return `${amount.toLocaleString('vi-VN')} đ`;
+    };
+
     const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.price * item.quantity, 0), [items]);
-    const discount = hasItems ? 25.0 : 0;
+
+    const discount = 0;
     const total = Math.max(0, subtotal - discount);
 
     return (
@@ -89,7 +94,7 @@ function Cart() {
                                             </button>
                                         </div>
 
-                                        <span className={styles['item-price']}>${(item.price * item.quantity).toFixed(2)}</span>
+                                        <span className={styles['item-price']}>{formatVND(item.price * item.quantity)}</span>
                                     </div>
                                 </div>
                             </article>
@@ -112,25 +117,26 @@ function Cart() {
                                 <div className={styles['summary-rows']}>
                                     <div className={styles['summary-row']}>
                                         <span>Tạm tính</span>
-                                        <span>${subtotal.toFixed(2)}</span>
+                                        <span>{formatVND(subtotal)}</span>
                                     </div>
                                     <div className={styles['summary-row']}>
                                         <span>Vận chuyển</span>
                                         <span className={styles['text-free']}>Miễn phí</span>
                                     </div>
+
                                     <div className={`${styles['summary-row']} ${styles.discount}`}>
-                                        <span>Giảm giá thành viên</span>
-                                        <span>-${discount.toFixed(2)}</span>
+                                        <span>Giảm giá</span>
+                                        <span>{discount > 0 ? `-${formatVND(discount)}` : 'Không có'}</span>
                                     </div>
                                 </div>
 
                                 <div className={styles['summary-total']}>
                                     <span>Tổng cộng</span>
-                                    <span className={styles['total-amount']}>${total.toFixed(2)}</span>
+                                    <span className={styles['total-amount']}>{formatVND(total)}</span>
                                 </div>
 
                                 <Link to="/checkout" className={styles['checkout-btn']}>
-                                     Thanh toán
+                                    Thanh toán
                                     <span className="material-symbols-outlined">arrow_forward</span>
                                 </Link>
                             </>

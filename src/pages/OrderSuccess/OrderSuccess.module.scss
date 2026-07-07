@@ -8,7 +8,7 @@
   min-height: 100vh;
 
   .success-container {
-    max-w: 48rem;
+    max-width: 48rem;
     margin-left: auto;
     margin-right: auto;
     display: flex;
@@ -47,7 +47,7 @@
     .success-subtitle {
       color: #666666;
       font-size: 1rem;
-      max-w: 32rem;
+      max-width: 32rem; /* Đã sửa từ max-w */
       margin-bottom: 3rem;
       line-height: 1.5;
     }
@@ -58,13 +58,13 @@
       border: 1px solid #e5e5e5;
       border-radius: 0.75rem;
       overflow: hidden;
-      margin-bottom: 3rem;
+      margin-bottom: 1.5rem;
       text-align: left;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 
       .card-header {
         padding: 1.5rem;
-        border-b: 1px solid #e5e5e5;
+        border-bottom: 1px solid #e5e5e5; /* Đã sửa từ border-b */
         display: flex;
         flex-direction: column;
         background-color: #f8f9fa;
@@ -97,101 +97,84 @@
           @media (min-width: 768px) {
             text-align: right;
           }
-
-          .delivery-time {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #1a1a1a;
-          }
         }
       }
+    }
 
-      .card-body {
-        padding: 1.5rem;
+    /* Đã đồng bộ class với file OrderSuccess.js */
+    .order-items-section {
+      width: 100%;
+      background-color: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 3rem;
+      text-align: left;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 
-        .summary-title {
-          font-size: 0.875rem;
-          font-weight: 700;
-          color: #666666;
-          margin-bottom: 1.5rem;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-        }
+      .items-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e5e5;
+      }
 
-        .items-list {
+      .items-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+
+        .order-item {
           display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-
-          .product-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-
-            .img-box {
-              width: 5rem;
-              height: 5rem;
-              background-color: #f3f4f6;
-              border-radius: 0.5rem;
-              overflow: hidden;
-              flex-shrink: 0;
-
-              img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-              }
-
-              .img-fallback {
-                width: 100%;
-                height: 100%;
-                background-size: cover;
-                background-position: center;
-              }
-            }
-
-            .item-info {
-              flex-grow: 1;
-
-              .product-name {
-                font-size: 1.125rem;
-                font-weight: 600;
-                color: #1a1a1a;
-                margin-bottom: 0.25rem;
-              }
-
-              .product-meta {
-                font-size: 0.875rem;
-                color: #666666;
-              }
-            }
-
-            .item-price {
-              text-align: right;
-              font-weight: 700;
-              color: #1a1a1a;
-            }
-          }
-        }
-
-        .total-divider {
-          margin-top: 2rem;
-          padding-top: 1.5rem;
-          border-top: 1px solid #e5e5e5;
-          display: flex;
-          justify-content: space-between;
           align-items: center;
+          gap: 1rem;
 
-          .total-label {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #666666;
+          .item-image {
+            width: 5rem;
+            height: 5rem;
+            background-color: #f3f4f6;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            flex-shrink: 0;
+
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
           }
 
-          .total-price {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #0066cc;
+          .item-info {
+            flex-grow: 1;
+
+            .item-name {
+              font-size: 1rem;
+              font-weight: 600;
+              color: #1a1a1a;
+              margin-bottom: 0.25rem;
+            }
+
+            .item-meta {
+              font-size: 0.875rem;
+              color: #666666;
+              margin-bottom: 0.5rem;
+            }
+
+            .item-price-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              font-size: 0.875rem;
+              color: #666666;
+
+              .item-price {
+                font-weight: 700;
+                color: #0066cc;
+                font-size: 1rem;
+              }
+            }
           }
         }
       }
