@@ -21,6 +21,11 @@ const OrderService = {
     return response.data;
   },
 
+  getOrderByCode: async (orderCode) => {
+    const response = await API.get(`/orders/code/${orderCode}`);
+    return response.data;
+  },
+
   updateOrderStatus: async (orderId, payload) => {
     const response = await API.patch(`/orders/${orderId}/status`, payload);
     return response.data;
