@@ -22,7 +22,6 @@
     }
 }
 
-/* --- Breadcrumbs --- */
 .breadcrumb {
     margin-bottom: 2rem;
     font-size: 0.875rem;
@@ -65,7 +64,6 @@
     font-weight: 700;
 }
 
-/* --- Hero Section (Grid) --- */
 .product-hero {
     display: grid;
     grid-template-columns: 1fr;
@@ -77,7 +75,6 @@
     }
 }
 
-/* --- Thư viện Ảnh (Trái) --- */
 .product-gallery {
     display: flex;
     flex-direction: column;
@@ -146,7 +143,6 @@
     }
 }
 
-/* Lưới hình thu nhỏ */
 .thumbnail-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -194,7 +190,6 @@
     color: #64748b;
 }
 
-/* Nút chuyển ảnh (Carousel) */
 .gallery-nav-btn {
     position: absolute;
     top: 50%;
@@ -225,7 +220,6 @@
     }
 }
 
-/* --- Thông tin Sản phẩm (Phải) --- */
 .product-info-sticky {
     position: sticky;
     top: 120px;
@@ -257,7 +251,6 @@
     line-height: 1.6;
 }
 
-/* Các Options (Color/Size) */
 .selection-group {
     margin-bottom: 2rem;
 }
@@ -379,7 +372,6 @@
     }
 }
 
-/* Add to Cart CTA */
 .cta-group {
     display: flex;
     flex-direction: column;
@@ -387,8 +379,15 @@
     margin-bottom: 2.5rem;
 }
 
-.btn-add-to-cart {
+/* Thêm class mới bọc 2 nút bấm */
+.cta-buttons-wrapper {
+    display: flex;
+    gap: 12px;
     width: 100%;
+}
+
+.btn-add-to-cart {
+    flex: 1; /* Dùng flex: 1 để chiếm 50% chiều rộng */
     height: 3.5rem;
     background: var(--primary);
     color: var(--on-primary);
@@ -410,6 +409,55 @@
         background: #1e293b;
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        &:hover {
+            background: var(--primary);
+            box-shadow: none;
+        }
+    }
+}
+
+.btn-wishlist {
+    flex: 1; /* Dùng flex: 1 để chiếm 50% chiều rộng, bằng với nút Thêm vào giỏ */
+    height: 3.5rem; /* Đặt chiều cao bằng đúng nút Add to cart */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* Khoảng cách giữa icon và chữ */
+    padding: 0;
+    border: 1px solid var(--outline-variant);
+    border-radius: 0.5rem;
+    background: var(--surface);
+    color: var(--on-surface);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase; /* Đồng bộ font chữ với nút Add to cart */
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background-color: #fff5f5;
+        border-color: #fca5a5;
+        color: #dc2626; /* Đổi màu chữ khi hover */
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
+
+    &.liked {
+        background-color: #fff5f5;
+        border-color: #fca5a5;
+        color: #dc2626;
+
+        span.material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+            color: #dc2626 !important;
+        }
+    }
 }
 
 .shipping-info {
@@ -425,7 +473,6 @@
     font-size: 1.25rem;
 }
 
-/* Accordion */
 .accordion-group {
     border-top: 1px solid var(--surface-container-highest);
 }
@@ -450,7 +497,6 @@
     font-size: 1rem;
 }
 
-/* --- Đánh giá (Reviews) --- */
 .reviews-section {
     margin-top: 7.5rem;
     padding-top: 5rem;
@@ -639,7 +685,6 @@
     }
 }
 
-/* --- Sản phẩm liên quan --- */
 .related-section {
     margin-top: 7.5rem;
     padding-top: 5rem;
@@ -662,5 +707,32 @@
 
     @media (min-width: 1024px) {
         grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.toast-notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background-color: #10b981;
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 0.95rem;
+    font-weight: 600;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: translateX(150%);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    &.show {
+        transform: translateX(0);
+    }
+
+    &.favorite {
+        background-color: #ef4444;
     }
 }

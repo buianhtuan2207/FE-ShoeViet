@@ -17,12 +17,16 @@ function Cart() {
         if (!item) return;
         const nextQty = Math.max(1, item.quantity + change);
         setItems(CartService.updateQuantity(itemKey, nextQty));
+
+        window.dispatchEvent(new Event('cartChange'));
     };
 
     const removeItem = (itemKey) => {
         const confirmed = window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng không?');
         if (confirmed) {
             setItems(CartService.removeItem(itemKey));
+
+            window.dispatchEvent(new Event('cartChange'));
         }
     };
 

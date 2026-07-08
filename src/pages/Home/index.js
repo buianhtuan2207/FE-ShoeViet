@@ -13,28 +13,24 @@ const TECH_FEATURES = [
 
 const CategoryCard = ({ data }) => {
     const { id, name, description, isLarge, imageUrl } = data;
-
-    const fallbackImg = isLarge
-        ? 'https://images.unsplash.com/photo-1595950653106-6c9ebd614c3a?q=80&w=800&auto=format&fit=crop'
-        : 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=800&auto=format&fit=crop';
-
-    const img = imageUrl || fallbackImg;
+    const img = imageUrl;
 
     return (
-        <Link to={`/products?category=${id}`} className={`${styles['category-card']} ${isLarge ? styles['category-card-large'] : ''}`}>
-            <img src={img} alt={name} className={styles['category-img']} />
-            <div className={styles['category-overlay']}>
-                {isLarge ? (
-                    <>
-                        <h3 className={styles['category-title-large']}>{name}</h3>
-                        <p className={styles['category-subtitle']}>{description}</p>
-                    </>
-                ) : (
-                    <h3 className={styles['category-title-small']}>{name}</h3>
-                )}
-            </div>
-        </Link>
-    );
+
+    <Link to={`/product?categoryId=${id}`} className={`${styles['category-card']} ${isLarge ? styles['category-card-large'] : ''}`}>
+        <img src={img} alt={name} className={styles['category-img']} />
+        <div className={styles['category-overlay']}>
+            {isLarge ? (
+                <>
+                    <h3 className={styles['category-title-large']}>{name}</h3>
+                    <p className={styles['category-subtitle']}>{description}</p>
+                </>
+            ) : (
+                <h3 className={styles['category-title-small']}>{name}</h3>
+            )}
+        </div>
+    </Link>
+);
 };
 
 function Home() {
@@ -96,7 +92,7 @@ function Home() {
 
                 <div className={styles['hero-content']}>
                     <h1 className={styles['hero-title']}>
-                        Thiết Kế Dành Cho<br />Hiệu Suất.
+                        Thiết Kế Thời Thượng.
                     </h1>
                     <p className={styles['hero-desc']}>
                         Khám phá đỉnh cao của thẩm mỹ thành thị. Bộ sưu tập Apex V2 mới đã ra mắt, định nghĩa lại mọi giới hạn trên đường phố.
@@ -119,12 +115,19 @@ function Home() {
                         <h2 className={styles['section-subtitle']}>Được Tin Dùng Bởi Các Biểu Tượng Toàn Cầu</h2>
                         <div className={styles['brands-list']}>
                             {brands.map((brand) => (
-                                <span key={brand.id} className={styles['brand-item']}>{brand.name.toUpperCase()}</span>
-                            ))}
-                        </div>
+                                <Link
+                                key={brand.id}
+                             to={`/product?brandId=${brand.id}`}
+                             className={styles['brand-item']}
+                             style={{ textDecoration: 'none', color: 'inherit' }}
+                        >
+                            {brand.name.toUpperCase()}
+                        </Link>
+                        ))}
                     </div>
+                </div>
                 </section>
-            )}
+                )}
 
             {categories.length > 0 && (
                 <section className={styles['categories-section']}>
@@ -134,7 +137,8 @@ function Home() {
                                 <h2 className={styles['section-title']}>Danh Mục Giày</h2>
                                 <p className={styles['section-desc']}>Khám phá các bộ sưu tập giày chuyên dụng của chúng tôi.</p>
                             </div>
-                            <Link to="/products" className={styles['view-all-link']}>Xem Tất Cả</Link>
+                            {/* Sửa /products thành /product */}
+                            <Link to="/product" className={styles['view-all-link']}>Xem Tất Cả</Link>
                         </div>
                         <div className={styles['categories-grid']}>
                             {categories.map(category => (
